@@ -38,11 +38,12 @@ type RadarGraphInput = {
 
 // Create the radar graph based on the given input
 function createRadarGraph(input: RadarGraphInput) {
-    const color = { r: 1, g: 0, b: 0 }; // Red color in Figma's color format
+  const color = hexToRgb("#F24822");
+  const strokeColor = hexToRgb("DBDBDB");
     const frameSize = 500;
-    const centerX = frameSize / 2;
-    const centerY = frameSize / 2;
-    const maxRadius = frameSize / 2;
+    const centerX = 250; //frameSize / 2;
+    const centerY = 250; //frameSize / 2;
+    const maxRadius = 200 //frameSize / 2;
     
     
 
@@ -91,6 +92,8 @@ function createRadarGraph(input: RadarGraphInput) {
                     ],
                     segments: [{ start: 0, end: 1 }]
                 };
+                vector.strokes = [{ type: 'SOLID', color: strokeColor }];
+                vector.strokeWeight = 2 ;
                 frame.appendChild(vector);
                 vector.constraints = {
                     horizontal: "SCALE",
@@ -109,6 +112,8 @@ function createRadarGraph(input: RadarGraphInput) {
                 return { start: i, end: i + 1 };
             }).concat({ start: polygonPoints.length - 1, end: 0 }) // To close the polygon
         };
+        vectorPolygon.strokes = [{ type: 'SOLID', color: strokeColor }];
+        vectorPolygon.strokeWeight = 2 ;
         frame.appendChild(vectorPolygon);
         vectorPolygon.constraints = {
             horizontal: "SCALE",
@@ -149,7 +154,7 @@ function createRadarGraph(input: RadarGraphInput) {
   };
     
     radarStrokePolygon.strokes = [{ type: 'SOLID', color: color }];
-    radarStrokePolygon.strokeWeight = 2;
+    radarStrokePolygon.strokeWeight = 4;
     frame.appendChild(radarStrokePolygon);
     radarStrokePolygon.constraints = {
         horizontal: "SCALE",
@@ -175,4 +180,16 @@ function createRadarGraph(input: RadarGraphInput) {
             vertical: "SCALE"
         };
     }
+}
+
+function hexToRgb(hex: string): { r: number, g: number, b: number } {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) {
+      throw new Error("Invalid HEX color.");
+  }
+  return {
+      r: parseInt(result[1], 16) / 255,
+      g: parseInt(result[2], 16) / 255,
+      b: parseInt(result[3], 16) / 255
+  };
 }
