@@ -1,17 +1,24 @@
-<h2>Shape Creator</h2>
-<p>Count: <input id="count" type="number" value="5"></p>
-<button id="create">Create</button>
-<button id="cancel">Cancel</button>
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Radar Chart Generator UI</title>
+    <style>
+        /* You can style your button and UI here */
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="onGenerateButtonClick()">Generate Radar Chart</button>
 
-document.getElementById('create').onclick = () => {
-  const textbox = document.getElementById('count');
-  const count = parseInt(textbox.value, 10);
-  parent.postMessage({ pluginMessage: { type: 'create-shapes', count } }, '*')
-}
-
-document.getElementById('cancel').onclick = () => {
-  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
-}
-
-</script>
+    <script>
+        function onGenerateButtonClick() {
+            // Send a message to the main plugin code
+            parent.postMessage({ pluginMessage: { type: 'generateRadarChart' } }, '*');
+        }
+    </script>
+</body>
+</html>
