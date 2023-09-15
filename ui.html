@@ -2,23 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Radar Chart Generator UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Chart UI</title>
     <style>
-        /* You can style your button and UI here */
-        button {
-            padding: 10px 15px;
-            cursor: pointer;
+        /* Basic styles for the form */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
     </style>
 </head>
 <body>
-    <button onclick="onGenerateButtonClick()">Generate Radar Chart</button>
 
-    <script>
-        function onGenerateButtonClick() {
-            // Send a message to the main plugin code
-            parent.postMessage({ pluginMessage: { type: 'generateRadarChart' } }, '*');
+<form id="dataForm">
+    <!-- Initial 6 fields -->
+    <div>
+      <label for="minValue">Min Value:</label>
+      <input type="number" id="minValue" value="0">
+  </div>
+  <div>
+      <label for="maxValue">Max Value:</label>
+      <input type="number" id="maxValue" value="100">
+  </div>
+    <div class="field">
+      <input type="text" value="A" class="name">
+      <input type="number" value="92" class="value">
+    </div>
+    <div class="field">
+      <input type="text" value="B" class="name">
+      <input type="number" value="85" class="value">
+    </div>    
+    <div class="field">
+      <input type="text" value="C" class="name">
+      <input type="number" value="79" class="value">
+    </div>
+    <div class="field">
+      <input type="text" value="D" class="name">
+      <input type="number" value="34" class="value">
+    </div>
+    <div class="field">
+      <input type="text" value="E" class="name">
+      <input type="number" value="65" class="value">
+    </div>
+    <div class="field">
+      <input type="text" value="G" class="name">
+      <input type="number" value="92" class="value">
+    </div>
+    <!-- ...repeat above div 5 more times... -->
+</form>
+
+<button id="addMore">Add More</button>
+<button id="submit">Submit</button>
+
+<script>
+    const form = document.getElementById('dataForm');
+    const addMoreBtn = document.getElementById('addMore');
+    const submitBtn = document.getElementById('submit');
+
+    // Add a new field when "Add More" is clicked
+    addMoreBtn.addEventListener('click', () => {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.classList.add('field');
+        
+        const nameInput = document.createElement('input');
+        nameInput.setAttribute('type', 'text');
+        nameInput.setAttribute('placeholder', 'Name');
+        nameInput.classList.add('name');
+        
+        const valueInput = document.createElement('input');
+        valueInput.setAttribute('type', 'number');
+        valueInput.setAttribute('placeholder', 'Value');
+        valueInput.classList.add('value');
+
+        fieldDiv.appendChild(nameInput);
+        fieldDiv.appendChild(valueInput);
+        form.appendChild(fieldDiv);
+    });
+
+    // Send data to Figma plugin when "Submit" is clicked
+        submitBtn.addEventListener('click', () => {
+        const minValue = document.getElementById('minValue').value;
+        const maxValue = document.getElementById('maxValue').value;
+        const names = document.querySelectorAll('.name');
+        const values = document.querySelectorAll('.value');
+        
+        const data = {
+            minValue: Number(minValue),
+            maxValue: Number(maxValue),
+            dataSets: []
+        };
+
+        for (let i = 0; i < names.length; i++) {
+            data.dataSets.push({
+                name: names[i].value,
+                value: Number(values[i].value)
+            });
         }
-    </script>
+
+        // Send data to Figma's code.ts
+        parent.postMessage({ pluginMessage: { type: 'submitData', data: data } }, '*');
+    });
+</script>
+
 </body>
 </html>
