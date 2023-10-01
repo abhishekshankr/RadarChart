@@ -1,109 +1,429 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radar Chart UI</title>
-    <style>
-        /* Basic styles for the form */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-    </style>
+  <title>Radar Chart UI</title>
+  <style>
+    :root {
+      --button-color: #1a70e2;
+      --hover-color: #0c5fbd;
+      --hover-color-strokbtn: #ebf4ff;
+      --hover-color-svg: #e5150d;
+    }
+
+    body {
+      font-family: Inter;
+      font-size: 12px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Basic styles for the form */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    /* Styling for side-by-side inputs */
+    .side-by-side {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .category {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 10px;
+      align-self: stretch;
+      margin-top: 8px;
+    }
+
+    .field {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      align-self: stretch;
+    }
+
+    .removable {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      align-items: center;
+
+    }
+
+    .remove-btn {
+      width: 24px;
+      height: 24px;
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0px;
+      cursor: pointer;
+    }
+
+    .remove-btn svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .remove-btn:hover svg path {
+      fill: var(--hover-color-svg);
+      transition: fill 0.2s ease;
+    }
+
+
+    input[type="text"],
+    input[type="number"] {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 12px;
+      margin: 8px 0px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: var(--button-color);
+      color: white;
+    }
+
+    .cta {
+      padding: 12px;
+      width: 100%;
+    }
+
+    .cta:hover {
+      background-color: var(--hover-color);
+      transition: background-color 0.2s ease;
+    }
+
+    .stroke-button {
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid var(--button-color);
+      color: var(--button-color);
+    }
+
+    .stroke-button:hover {
+      background-color: var(--hover-color-strokbtn);
+      transition: background-color 0.2s ease;
+    }
+
+    section {
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    .button-section{
+      background-color: #fff;
+      position: sticky;
+      bottom: 0;
+    }
+
+    .color-picker-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .color-square {
+      display: flex;
+      width: 30px;
+      height: 30px;
+      margin-right: 8px;
+      cursor: pointer;
+      border: 2px solid #fff;
+      outline: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
 </head>
+
 <body>
 
-<form id="dataForm">
-    <!-- Initial 6 fields -->
-    <div>
-      <label for="minValue">Min Value:</label>
-      <input type="number" id="minValue" value="0">
-  </div>
-  <div>
-      <label for="maxValue">Max Value:</label>
-      <input type="number" id="maxValue" value="100">
-  </div>
-    <div class="field">
-      <input type="text" value="A" class="name">
-      <input type="number" value="92" class="value">
+  <!-- Styling Section -->
+  <section>
+
+    <label class="section-title">Styling</label>
+    <div class="side-by-side">
+
+      <div class="category">
+        <label for="colorPicker">Chart Color</label>
+        <div class="color-picker-container">
+          <div class="color-square" id="colorSquare"></div>
+          <input type="color" id="color" style="display:none" />
+          <input type="text" id="colorHex" />
+        </div>
+      </div>
+
+      <div class="category">
+        <label for="rounding">Corner Radius</label>
+        <input type="number" min="0" id="rounding" value="2">
+      </div>
+
     </div>
-    <div class="field">
-      <input type="text" value="B" class="name">
-      <input type="number" value="85" class="value">
-    </div>    
-    <div class="field">
-      <input type="text" value="C" class="name">
-      <input type="number" value="79" class="value">
+
+  </section>
+
+  <!-- Data Range Section -->
+  <section>
+    <label class="section-title">Data Range</label>
+    <div class="side-by-side">
+      <div class="category">
+        <label for="minValue">Min Value</label>
+        <input type="number" id="minValue" value="0">
+      </div>
+
+      <div class="category">
+        <label for="maxValue">Max Value</label>
+        <input type="number" id="maxValue" value="100">
+      </div>
     </div>
+  </section>
+
+  <!-- Data Input Section -->
+  <form id="dataForm">
+    <label class="section-title">Data Input</label>
+
+
     <div class="field">
-      <input type="text" value="D" class="name">
-      <input type="number" value="34" class="value">
+      <div class="category">
+        <label for="dataName">Data Name</label>
+        <input type="text" value="Data 1" class="name">
+      </div>
+      <div class="category">
+        <label for="dataValue">Data Value</label>
+        <input type="number" value="34" class="value">
+      </div>
     </div>
+
+
     <div class="field">
-      <input type="text" value="E" class="name">
+      <input type="text" value="Data 2" class="name">
       <input type="number" value="65" class="value">
     </div>
     <div class="field">
-      <input type="text" value="G" class="name">
+      <input type="text" value="Data 3" class="name">
       <input type="number" value="92" class="value">
     </div>
-    <!-- ...repeat above div 5 more times... -->
-</form>
+    <div class="field removable">
+      <input type="text" value="Data 4" class="name">
+      <input type="number" value="92" class="value">
+      <button class="remove-btn" onclick="removeField(this)">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M8 23.75L6.25 22L13.25 15L6.25 8L8 6.25L15 13.25L22 6.25L23.75 8L16.75 15L23.75 22L22 23.75L15 16.75L8 23.75Z"
+            fill="#1C1B1F" />
+        </svg>
+      </button>
+    </div>
+    <div class="field removable">
+      <input type="text" value="Data 5" class="name">
+      <input type="number" value="85" class="value">
+      <button class="remove-btn" onclick="removeField(this)"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M8 23.75L6.25 22L13.25 15L6.25 8L8 6.25L15 13.25L22 6.25L23.75 8L16.75 15L23.75 22L22 23.75L15 16.75L8 23.75Z"
+            fill="#1C1B1F" />
+        </svg> </button>
+    </div>
+    <div class="field removable">
+      <input type="text" value="Data 6" class="name">
+      <input type="number" value="79" class="value">
+      <button class="remove-btn" onclick="removeField(this)"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M8 23.75L6.25 22L13.25 15L6.25 8L8 6.25L15 13.25L22 6.25L23.75 8L16.75 15L23.75 22L22 23.75L15 16.75L8 23.75Z"
+            fill="#1C1B1F" />
+        </svg> </button>
+    </div>
+  </form>
 
-<button id="addMore">Add More</button>
-<button id="submit">Submit</button>
+  <section class="button-section">
+    <button class="stroke-button" id="addMore">+ Add Data Rows</button>
+    <button class="cta" id="submit">Create Chart</button>
+  </section>
 
-<script>
+  <script>
     const form = document.getElementById('dataForm');
     const addMoreBtn = document.getElementById('addMore');
     const submitBtn = document.getElementById('submit');
 
-    // Add a new field when "Add More" is clicked
     addMoreBtn.addEventListener('click', () => {
-        const fieldDiv = document.createElement('div');
-        fieldDiv.classList.add('field');
-        
-        const nameInput = document.createElement('input');
-        nameInput.setAttribute('type', 'text');
-        nameInput.setAttribute('placeholder', 'Name');
-        nameInput.classList.add('name');
-        
-        const valueInput = document.createElement('input');
-        valueInput.setAttribute('type', 'number');
-        valueInput.setAttribute('placeholder', 'Value');
-        valueInput.classList.add('value');
+      const fieldDiv = document.createElement('div');
+      fieldDiv.classList.add('field', 'removable'); // Add the 'removable' class
 
-        fieldDiv.appendChild(nameInput);
-        fieldDiv.appendChild(valueInput);
-        form.appendChild(fieldDiv);
+      const nameInput = document.createElement('input');
+      nameInput.setAttribute('type', 'text');
+      nameInput.setAttribute('placeholder', 'Name');
+      nameInput.classList.add('name');
+
+      const valueInput = document.createElement('input');
+      valueInput.setAttribute('type', 'number');
+      valueInput.setAttribute('placeholder', 'Value');
+      valueInput.classList.add('value');
+
+      // Create the remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.classList.add('remove-btn');
+      removeBtn.onclick = function () {
+        fieldDiv.remove();
+      };
+
+      // Create the SVG element using your provided SVG content
+      const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgElement.setAttribute('width', '30');
+      svgElement.setAttribute('height', '30');
+      svgElement.setAttribute('viewBox', '0 0 30 30');
+      svgElement.setAttribute('fill', 'none');
+      svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+      const svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      svgPath.setAttribute('d', 'M8 23.75L6.25 22L13.25 15L6.25 8L8 6.25L15 13.25L22 6.25L23.75 8L16.75 15L23.75 22L22 23.75L15 16.75L8 23.75Z');
+      svgPath.setAttribute('fill', '#1C1B1F');
+
+      svgElement.appendChild(svgPath);
+
+      // Append the SVG to the button
+      removeBtn.appendChild(svgElement);
+
+      fieldDiv.appendChild(nameInput);
+      fieldDiv.appendChild(valueInput);
+      fieldDiv.appendChild(removeBtn); // Append the remove button with SVG icon
+      form.appendChild(fieldDiv);
     });
+
+
 
     // Send data to Figma plugin when "Submit" is clicked
-        submitBtn.addEventListener('click', () => {
-        const minValue = document.getElementById('minValue').value;
-        const maxValue = document.getElementById('maxValue').value;
-        const names = document.querySelectorAll('.name');
-        const values = document.querySelectorAll('.value');
-        
-        const data = {
-            minValue: Number(minValue),
-            maxValue: Number(maxValue),
-            dataSets: []
-        };
+    submitBtn.addEventListener('click', () => {
+      const minValue = document.getElementById('minValue').value;
+      const maxValue = document.getElementById('maxValue').value;
+      const color = document.getElementById('colorHex').value;
+      const rounding = document.getElementById('rounding').value;
+      const names = document.querySelectorAll('.name');
+      const values = document.querySelectorAll('.value');
 
-        for (let i = 0; i < names.length; i++) {
-            data.dataSets.push({
-                name: names[i].value,
-                value: Number(values[i].value)
-            });
-        }
+      const data = {
+        minValue: Number(minValue),
+        maxValue: Number(maxValue),
+        color: color,
+        rounding: Number(rounding),
+        dataSets: []
+      };
 
-        // Send data to Figma's code.ts
-        parent.postMessage({ pluginMessage: { type: 'submitData', data: data } }, '*');
+      for (let i = 0; i < names.length; i++) {
+        data.dataSets.push({
+          name: names[i].value,
+          value: Number(values[i].value)
+        });
+      }
+
+      // Send data to Figma's code.ts
+      parent.postMessage({ pluginMessage: { type: 'submitData', data: data } }, '*');
     });
-</script>
+
+    function removeField(btn) {
+      const field = btn.closest('.field');
+      field.remove();
+    }
+
+    const minValueInput = document.getElementById('minValue');
+    const maxValueInput = document.getElementById('maxValue');
+
+    // Function to update the min and max attributes of all data input fields
+    function updateDataInputConstraints() {
+      const minValue = parseFloat(minValueInput.value);
+      const maxValue = parseFloat(maxValueInput.value);
+
+      document.querySelectorAll('.value').forEach(input => {
+        input.setAttribute('min', minValue);
+        input.setAttribute('max', maxValue);
+      });
+    }
+
+    // Add event listeners to the minValue and maxValue input fields
+    minValueInput.addEventListener('input', updateDataInputConstraints);
+    maxValueInput.addEventListener('input', updateDataInputConstraints);
+
+    // Function to correct data input values if they're outside the allowed range
+    function checkDataInputValue(input) {
+      const value = parseFloat(input.value);
+      const minValue = parseFloat(minValueInput.value);
+      const maxValue = parseFloat(maxValueInput.value);
+
+      if (value < minValue) {
+        input.value = minValue;
+      } else if (value > maxValue) {
+        input.value = maxValue;
+      }
+    }
+
+    // Add event listeners to all data input fields
+    document.querySelectorAll('.value').forEach(input => {
+      input.addEventListener('input', () => checkDataInputValue(input));
+    });
+
+
+    const colorSquare = document.getElementById('colorSquare');
+    const colorInput = document.getElementById('color');
+    const colorHex = document.getElementById('colorHex');
+
+    colorHex.value = getRandomHexColor();
+
+    colorInput.value = colorHex.value;
+    colorSquare.style.backgroundColor = colorHex.value;
+
+    colorHex.addEventListener('input', () => {
+      if (isValidHex(colorHex.value)) {
+        colorSquare.style.backgroundColor = colorHex.value;
+        colorInput.value = colorHex.value;
+      }
+
+    });
+
+    colorSquare.onclick = () => {
+      colorInput.click();
+    };
+
+    colorInput.addEventListener('change', () => {
+      colorSquare.style.backgroundColor = colorInput.value;
+      colorHex.value = colorInput.value;
+    });
+
+    function isValidHex(hex) {
+      return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex);
+    }
+
+    function getRandomHexColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+  </script>
 
 </body>
+
 </html>

@@ -1,12 +1,13 @@
 
 // Show the UI
-figma.showUI(__html__, { width: 240, height: 600 });
+figma.showUI(__html__, { width: 400, height: 750 });
 
 // Listen to messages from the UI
 figma.ui.onmessage = msg => {
   if (msg.type === 'submitData') {
     const inputData: RadarGraphInput = {
-      color: "#FF0000", // Default color; you can modify this as needed or even get it from the UI
+      color: msg.data.color, // Updated to get the color from the UI
+      rounding: msg.data.rounding, // New field
       minValue: msg.data.minValue,
       maxValue: msg.data.maxValue,
       dataSets: msg.data.dataSets
@@ -24,32 +25,56 @@ type DataSet = {
 
 type RadarGraphInput = {
   color: string;
+  rounding: number; // New field for the rounding input
   minValue: number;
   maxValue: number;
   dataSets: DataSet[];
 };
 
+
 // Create the radar graph based on the given input
 async function createRadarGraph(input: RadarGraphInput) {
+  
+  //Awaiting font load for text
+  await figma.loadFontAsync({ family: "Inter", style: "Bold" });
   await figma.loadFontAsync({ family: "Inter", style: "Medium" });
   await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-  const color = hexToRgb("#F24822");
+  
+  const color = hexToRgb(input.color);
+
+  const cornerRadius = input.rounding; // Get the rounding value
+
   const spiderPolygonColor = hexToRgb("F1F1F1");
   const frameSize = 500;
   const centerX = 250; //frameSize / 2;
   const centerY = 250; //frameSize / 2;
   const maxRadius = 200 //frameSize / 2;
 
+  const scaleDivision = (input.maxValue - input.minValue) / 5;
 
 
   // Create a new frame for the radar graph
-  const frame = figma.createFrame();
-  frame.resize(frameSize, frameSize);
-  figma.currentPage.appendChild(frame);
-  frame.constraints = {
+// Create a new frame for the radar graph
+const frame = figma.createFrame();
+frame.name = 'Radar Chart';
+frame.resize(frameSize, frameSize);
+
+// Get the current viewport center
+const viewportCenterX = figma.viewport.center.x;
+const viewportCenterY = figma.viewport.center.y;
+
+// Adjust the position of the radar chart frame to the viewport center
+frame.x = viewportCenterX - frame.width / 2;
+frame.y = viewportCenterY - frame.height / 2;
+
+// Other settings and appending the frame
+frame.constraints = {
     horizontal: "SCALE",
     vertical: "SCALE"
-  };
+};
+figma.currentPage.appendChild(frame);
+
+
 
   const totalDataSets = input.dataSets.length;
   const angleIncrement = (2 * Math.PI) / totalDataSets;
@@ -70,12 +95,45 @@ async function createRadarGraph(input: RadarGraphInput) {
     const point = getPointOnCircle(angle, radius);
     radarPolygonPoints.push(`${point.x},${point.y}`);
   }
+
+  let divisionMultipler = 1;
+  
   // Draw spider-web pattern
   for (let i = 0.2; i <= 1; i += 0.2) {
     const polygonPoints: string[] = [];
     for (let j = 0; j < totalDataSets; j++) {
       const angle = j * angleIncrement + (3 * Math.PI / 2);
       const point = getPointOnCircle(angle, i * maxRadius);
+
+      // Create text labels for the data scale
+
+      if(j==0){
+        const labelOffset = -15; // Adjust as necessary
+        const labelText = figma.createText();
+        if(i==0.2){
+          labelText.characters = String(input.minValue + scaleDivision);
+        }
+        else if(i==1){
+          labelText.characters = String(input.maxValue);
+        }
+        else{
+          // limiting the decimal place of the values to 1
+          const labelValue = Number((input.minValue +(scaleDivision * divisionMultipler)).toFixed(1));
+          labelText.characters = String(labelValue);
+        }
+        //labelText.characters = String(input.dataSets[j].value);
+        labelText.fontName = { family: "Inter", style: "Bold" };
+        labelText.fontSize = 12;
+        labelText.fills = [{ type: 'SOLID', color: spiderPolygonColor }];
+        labelText.x = point.x + Math.cos(angle) * labelOffset - labelText.width / 2;
+        labelText.y = point.y + Math.sin(angle) * labelOffset - labelText.height / 2;
+        labelText.constraints = {
+          horizontal: "SCALE",
+          vertical: "SCALE"
+      };
+        frame.appendChild(labelText);
+        divisionMultipler++;
+      }
 
       if (i == 1) {
         // Creating text labels
@@ -86,16 +144,18 @@ async function createRadarGraph(input: RadarGraphInput) {
         labelText.fontName = { family: "Inter", style: "Medium" };
         labelText.fontSize = 12;
         labelText.x = point.x + Math.cos(angle) * labelOffset - labelText.width / 2;
-                labelText.y = point.y + Math.sin(angle) * labelOffset - labelText.height / 2;
-
+        labelText.y = point.y + Math.sin(angle) * labelOffset - labelText.height / 2;
+        labelText.constraints = {
+          horizontal: "SCALE",
+          vertical: "SCALE"
+      };
         frame.appendChild(labelText);
-
 
       }
       polygonPoints.push(`${point.x},${point.y}`);
 
-      // Createing lines from center to the circle
-      if (i === 1) {
+      // Creating lines from center to the circle
+      /*if (i === 1) {
         const vector = figma.createVector();
         vector.vectorNetwork = {
           vertices: [
@@ -111,7 +171,7 @@ async function createRadarGraph(input: RadarGraphInput) {
           horizontal: "SCALE",
           vertical: "SCALE"
         };
-      }
+      }*/
     }
 
     //Create the spider polygon
@@ -150,6 +210,8 @@ async function createRadarGraph(input: RadarGraphInput) {
   };
   radarFillPolygon.fills = [{ type: 'SOLID', color: color }];
   radarFillPolygon.opacity = 0.3;
+  radarFillPolygon.cornerRadius = cornerRadius;
+  
   frame.appendChild(radarFillPolygon);
   radarFillPolygon.constraints = {
     horizontal: "SCALE",
@@ -172,6 +234,8 @@ async function createRadarGraph(input: RadarGraphInput) {
   radarStrokePolygon.strokes = [{ type: 'SOLID', color: color }];
   radarStrokePolygon.strokeWeight = 4;
   radarStrokePolygon.strokeJoin = "ROUND";
+  radarStrokePolygon.cornerRadius = cornerRadius;
+
 
   frame.appendChild(radarStrokePolygon);
   radarStrokePolygon.constraints = {
@@ -180,7 +244,7 @@ async function createRadarGraph(input: RadarGraphInput) {
   };
 
   // Draw circles on data points
-  for (let i = 0; i < totalDataSets; i++) {
+  /*for (let i = 0; i < totalDataSets; i++) {
     const dataSet = input.dataSets[i];
     const radius = ((dataSet.value - input.minValue) / (input.maxValue - input.minValue)) * maxRadius;
     const angle = i * angleIncrement + (3 * Math.PI / 2);
@@ -197,7 +261,7 @@ async function createRadarGraph(input: RadarGraphInput) {
       horizontal: "SCALE",
       vertical: "SCALE"
     };
-  }
+  }*/
 }
 
 function hexToRgb(hex: string): { r: number, g: number, b: number } {
