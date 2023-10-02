@@ -62,6 +62,12 @@ async function createRadarGraph(input: RadarGraphInput) {
 const frame = figma.createFrame();
 frame.name = 'Radar Chart';
 frame.resize(frameSize, frameSize);
+if (figma.editorType === 'figma') {
+  frame.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+}
+else if(figma.editorType === 'figjam'){
+  frame.fills = [];
+}
 
 // Get the current viewport center
 const viewportCenterX = figma.viewport.center.x;
