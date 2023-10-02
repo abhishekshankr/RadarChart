@@ -1,6 +1,6 @@
 
 // Show the UI
-figma.showUI(__html__, { width: 400, height: 750 });
+figma.showUI(__html__, { width: 400, height: 780 });
 
 // Listen to messages from the UI
 figma.ui.onmessage = msg => {
@@ -10,7 +10,9 @@ figma.ui.onmessage = msg => {
       rounding: msg.data.rounding, // New field
       minValue: msg.data.minValue,
       maxValue: msg.data.maxValue,
-      dataSets: msg.data.dataSets
+      dataSets: msg.data.dataSets,
+      showDataValue: msg.data.showDataValue,
+      showDataPoints: msg.data.showDataPoints
     };
     createRadarGraph(inputData);
   }
@@ -29,6 +31,8 @@ type RadarGraphInput = {
   minValue: number;
   maxValue: number;
   dataSets: DataSet[];
+  showDataValue: boolean;
+  showDataPoints: boolean;
 };
 
 
@@ -74,8 +78,6 @@ frame.constraints = {
 };
 figma.currentPage.appendChild(frame);
 
-
-
   const totalDataSets = input.dataSets.length;
   const angleIncrement = (2 * Math.PI) / totalDataSets;
 
@@ -106,7 +108,7 @@ figma.currentPage.appendChild(frame);
       const point = getPointOnCircle(angle, i * maxRadius);
 
       // Create text labels for the data scale
-
+      if(input.showDataValue) {
       if(j==0){
         const labelOffset = -15; // Adjust as necessary
         const labelText = figma.createText();
@@ -134,7 +136,7 @@ figma.currentPage.appendChild(frame);
         frame.appendChild(labelText);
         divisionMultipler++;
       }
-
+      }
       if (i == 1) {
         // Creating text labels
 
@@ -155,7 +157,8 @@ figma.currentPage.appendChild(frame);
       polygonPoints.push(`${point.x},${point.y}`);
 
       // Creating lines from center to the circle
-      /*if (i === 1) {
+      if(!input.showDataValue){
+      if (i === 1) {
         const vector = figma.createVector();
         vector.vectorNetwork = {
           vertices: [
@@ -171,7 +174,8 @@ figma.currentPage.appendChild(frame);
           horizontal: "SCALE",
           vertical: "SCALE"
         };
-      }*/
+      }
+    }
     }
 
     //Create the spider polygon
@@ -243,8 +247,9 @@ figma.currentPage.appendChild(frame);
     vertical: "SCALE"
   };
 
+  if(input.showDataPoints){
   // Draw circles on data points
-  /*for (let i = 0; i < totalDataSets; i++) {
+  for (let i = 0; i < totalDataSets; i++) {
     const dataSet = input.dataSets[i];
     const radius = ((dataSet.value - input.minValue) / (input.maxValue - input.minValue)) * maxRadius;
     const angle = i * angleIncrement + (3 * Math.PI / 2);
@@ -261,7 +266,8 @@ figma.currentPage.appendChild(frame);
       horizontal: "SCALE",
       vertical: "SCALE"
     };
-  }*/
+  }
+}
 }
 
 function hexToRgb(hex: string): { r: number, g: number, b: number } {
