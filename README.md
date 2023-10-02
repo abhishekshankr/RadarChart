@@ -5,16 +5,19 @@
 
 Create custom radar/spider charts directly in Figma with ease!
 
----
+
 
 ## Features
 
 - **Custom Data Points**: Input your own data points to generate a radar chart tailored to your data.
 - **Styling Options**: Customize the appearance of the radar chart with color pickers, rounding inputs, and more.
 
+
 ## UI
 
 ![Plugin Preview](./assets/UI.png)
+
+
 ## Usage
 
 - Input your desired minimum and maximum values for the data scale.
@@ -25,7 +28,7 @@ Create custom radar/spider charts directly in Figma with ease!
 ## Feature Roadmap
 
 Radar Chart is in development. Additional features in development are: 
-Choose graph style
-Number labels for data 
-Choose scale division
+- Choose graph style
+- Number labels for data 
+- Choose scale division
 
