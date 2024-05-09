@@ -56,12 +56,11 @@ async function createRadarGraph(input: RadarGraphInput) {
 
   const scaleDivision = (input.maxValue - input.minValue) / 5;
 
-
-  // Create a new frame for the radar graph
 // Create a new frame for the radar graph
 const frame = figma.createFrame();
 frame.name = 'Radar Chart';
 frame.resize(frameSize, frameSize);
+
 if (figma.editorType === 'figma') {
   frame.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
 }
@@ -166,13 +165,13 @@ figma.currentPage.appendChild(frame);
       if(!input.showDataValue){
       if (i === 1) {
         const vector = figma.createVector();
-        vector.vectorNetwork = {
+        await vector.setVectorNetworkAsync({
           vertices: [
             { x: centerX, y: centerY },
             { x: point.x, y: point.y }
           ],
           segments: [{ start: 0, end: 1 }]
-        };
+        });
         vector.strokes = [{ type: 'SOLID', color: spiderPolygonColor }];
         vector.strokeWeight = 2;
         frame.appendChild(vector);
@@ -186,7 +185,7 @@ figma.currentPage.appendChild(frame);
 
     //Create the spider polygon
     const vectorPolygon = figma.createVector();
-    vectorPolygon.vectorNetwork = {
+    await vectorPolygon.setVectorNetworkAsync({
       vertices: polygonPoints.map(point => {
         const [x, y] = point.split(',').map(Number);
         return { x, y };
@@ -194,7 +193,7 @@ figma.currentPage.appendChild(frame);
       segments: Array(polygonPoints.length - 1).fill(0).map((_, i) => {
         return { start: i, end: i + 1 };
       }).concat({ start: polygonPoints.length - 1, end: 0 }) // To close the polygon
-    };
+    });
 
     vectorPolygon.strokes = [{ type: 'SOLID', color: spiderPolygonColor }];
     vectorPolygon.strokeWeight = 2;
@@ -209,7 +208,7 @@ figma.currentPage.appendChild(frame);
 
   // Draw radar chart polygon for fill
   const radarFillPolygon = figma.createVector();
-  radarFillPolygon.vectorNetwork = {
+  await radarFillPolygon.setVectorNetworkAsync({
     vertices: radarPolygonPoints.map(point => {
       const [x, y] = point.split(',').map(Number);
       return { x, y };
@@ -217,7 +216,7 @@ figma.currentPage.appendChild(frame);
     segments: Array(radarPolygonPoints.length - 1).fill(0).map((_, i) => {
       return { start: i, end: i + 1 };
     }).concat({ start: radarPolygonPoints.length - 1, end: 0 }) // To close the polygon
-  };
+  });
   radarFillPolygon.fills = [{ type: 'SOLID', color: color }];
   radarFillPolygon.opacity = 0.3;
   radarFillPolygon.cornerRadius = cornerRadius;
@@ -231,7 +230,7 @@ figma.currentPage.appendChild(frame);
   // Draw radar chart polygon for stroke
   const radarStrokePolygon = figma.createVector();
   //radarStrokePolygon.vectorNetwork = radarFillPolygon.vectorNetwork; // Use the same network
-  radarStrokePolygon.vectorNetwork = {
+  await radarStrokePolygon.setVectorNetworkAsync({
     vertices: radarPolygonPoints.map(point => {
       const [x, y] = point.split(',').map(Number);
       return { x, y };
@@ -239,7 +238,7 @@ figma.currentPage.appendChild(frame);
     segments: Array(radarPolygonPoints.length - 1).fill(0).map((_, i) => {
       return { start: i, end: i + 1 };
     }).concat({ start: radarPolygonPoints.length - 1, end: 0 }) // To close the polygon
-  };
+  });
 
   radarStrokePolygon.strokes = [{ type: 'SOLID', color: color }];
   radarStrokePolygon.strokeWeight = 4;
