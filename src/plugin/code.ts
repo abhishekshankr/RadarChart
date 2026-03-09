@@ -1,13 +1,23 @@
 
 // Show the UI
-figma.showUI(__html__, { width: 400, height: 780 });
+figma.showUI(__html__, { width: 760, height: 780 });
+
+// Send saved preferences to UI on launch
+figma.clientStorage.getAsync('prefs').then(prefs => {
+  figma.ui.postMessage({ type: 'prefsLoaded', prefs: prefs ?? {} });
+});
 
 // Listen to messages from the UI
-figma.ui.onmessage = msg => {
+figma.ui.onmessage = async msg => {
+  if (msg.type === 'setPrefs') {
+    await figma.clientStorage.setAsync('prefs', msg.prefs);
+    return;
+  }
   if (msg.type === 'submitData') {
     const inputData: RadarGraphInput = {
-      color: msg.data.color, // Updated to get the color from the UI
-      rounding: msg.data.rounding, // New field
+      color: msg.data.color,
+      gridColor: msg.data.gridColor || '#F1F1F1',
+      rounding: msg.data.rounding,
       minValue: msg.data.minValue,
       maxValue: msg.data.maxValue,
       dataSets: msg.data.dataSets,
@@ -27,7 +37,8 @@ type DataSet = {
 
 type RadarGraphInput = {
   color: string;
-  rounding: number; // New field for the rounding input
+  gridColor: string;
+  rounding: number;
   minValue: number;
   maxValue: number;
   dataSets: DataSet[];
@@ -46,9 +57,9 @@ async function createRadarGraph(input: RadarGraphInput) {
   
   const color = hexToRgb(input.color);
 
-  const cornerRadius = input.rounding; // Get the rounding value
+  const cornerRadius = input.rounding;
 
-  const spiderPolygonColor = hexToRgb("F1F1F1");
+  const spiderPolygonColor = hexToRgb(input.gridColor);
   const frameSize = 500;
   const centerX = 250; //frameSize / 2;
   const centerY = 250; //frameSize / 2;
