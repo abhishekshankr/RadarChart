@@ -19,10 +19,9 @@ function setToggle(btn: HTMLButtonElement, on: boolean) {
   btn.setAttribute('aria-checked', String(on));
 }
 
-function wireToggle(btn: HTMLButtonElement, onKey: string) {
+function wireToggle(btn: HTMLButtonElement) {
   btn.addEventListener('click', () => {
-    const next = !isToggleOn(btn);
-    setToggle(btn, next);
+    setToggle(btn, !isToggleOn(btn));
     savePrefs();
     triggerPreview();
   });
@@ -55,8 +54,8 @@ window.addEventListener('message', (event) => {
   }
 });
 
-wireToggle(showDataValueToggle, 'showDataValue');
-wireToggle(showDataPointsToggle, 'showDataPoints');
+wireToggle(showDataValueToggle);
+wireToggle(showDataPointsToggle);
 
 // ── HiDPI canvas setup ────────────────────────────────────────────────────────
 
@@ -68,8 +67,7 @@ function setupCanvas() {
   previewCanvas.style.height = cssSize + 'px';
   previewCanvas.width = Math.round(cssSize * dpr);
   previewCanvas.height = Math.round(cssSize * dpr);
-  const ctx = previewCanvas.getContext('2d')!;
-  ctx.scale(dpr, dpr);
+  previewCanvas.getContext('2d')!.scale(dpr, dpr);
 }
 
 // ── Form data helper ──────────────────────────────────────────────────────────
@@ -78,38 +76,32 @@ function getFormData() {
   const minValue = parseFloat((document.getElementById('minValue') as HTMLInputElement).value) || 0;
   const maxValue = parseFloat((document.getElementById('maxValue') as HTMLInputElement).value) || 100;
   const color = (document.getElementById('colorHex') as HTMLInputElement).value || '#6366f1';
+  const gridColor = gridColorHex.value || '#E5E7EB';
   const dataSets: { name: string; value: number }[] = [];
-  const names = document.querySelectorAll<HTMLInputElement>('.name');
-  const values = document.querySelectorAll<HTMLInputElement>('.value');
+  const names = form.querySelectorAll<HTMLInputElement>('.name');
+  const values = form.querySelectorAll<HTMLInputElement>('.value');
   for (let i = 0; i < names.length; i++) {
     dataSets.push({ name: names[i].value, value: Number(values[i].value) });
   }
-  const gridColor = (document.getElementById('gridColorHex') as HTMLInputElement).value || '#E5E7EB';
   return {
     color,
     gridColor,
     minValue,
     maxValue,
     dataSets,
-    showDataValue: isToggleOn(showDataValueToggle),
+    showDataValue: !isToggleOn(showDataValueToggle),
     showDataPoints: isToggleOn(showDataPointsToggle),
   };
 }
 
 // ── Live preview ──────────────────────────────────────────────────────────────
 
-let canvasReady = false;
-
 function triggerPreview() {
-  if (!canvasReady) {
-    setupCanvas();
-    canvasReady = true;
-  }
   renderPreview(previewCanvas, getFormData());
 }
 
 // ── Color pickers ─────────────────────────────────────────────────────────────
-// Initialised here (before first triggerPreview) so colors are applied
+// Initialised before first triggerPreview so colors are applied
 
 const colorSquare = document.getElementById('colorSquare') as HTMLElement;
 const colorInput = document.getElementById('color') as HTMLInputElement;
@@ -138,9 +130,9 @@ colorInput.addEventListener('change', () => {
 const gridColorSquare = document.getElementById('gridColorSquare') as HTMLElement;
 const gridColorInput = document.getElementById('gridColor') as HTMLInputElement;
 const gridColorHex = document.getElementById('gridColorHex') as HTMLInputElement;
+const resetGridColorBtn = document.getElementById('resetGridColor') as HTMLButtonElement;
 
 const DEFAULT_GRID_COLOR = '#E5E7EB';
-const resetGridColorBtn = document.getElementById('resetGridColor') as HTMLButtonElement;
 
 function applyGridColor(hex: string) {
   gridColorSquare.style.backgroundColor = hex;
@@ -173,35 +165,35 @@ gridColorInput.addEventListener('change', () => {
   triggerPreview();
 });
 
-// Listen on the whole document for input changes inside the form area
-document.addEventListener('input', triggerPreview);
+// ── Initial setup ─────────────────────────────────────────────────────────────
 
-// Initial render — prefs will arrive via prefsLoaded message and re-render;
-// render once now so canvas isn't blank on load
+setupCanvas();
 triggerPreview();
+
+// ── Scoped form input listener (excludes import modal) ────────────────────────
+
+form.addEventListener('input', triggerPreview);
 
 // ── Add row ───────────────────────────────────────────────────────────────────
 
 function createRemoveIcon() {
-  const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svgElement.setAttribute('viewBox', '0 0 14 14');
-  svgElement.setAttribute('fill', 'none');
-  svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  const svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  svgPath.setAttribute('d', 'M1 1l12 12M13 1L1 13');
-  svgPath.setAttribute('stroke', 'currentColor');
-  svgPath.setAttribute('stroke-width', '1.75');
-  svgPath.setAttribute('stroke-linecap', 'round');
-  svgElement.appendChild(svgPath);
-  return svgElement;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 14 14');
+  svg.setAttribute('fill', 'none');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'M1 1l12 12M13 1L1 13');
+  path.setAttribute('stroke', 'currentColor');
+  path.setAttribute('stroke-width', '1.75');
+  path.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(path);
+  return svg;
 }
 
 function randomRowDefaults(): { name: string; value: string } {
-  const n = document.querySelectorAll('.field').length + 1;
+  const n = form.querySelectorAll('.field').length + 1;
   const min = parseFloat(minValueInput.value) || 0;
   const max = parseFloat(maxValueInput.value) || 100;
-  const value = String(Math.round(min + Math.random() * (max - min)));
-  return { name: `Data ${n}`, value };
+  return { name: `Data ${n}`, value: String(Math.round(min + Math.random() * (max - min))) };
 }
 
 function addRow(name?: string, value?: string) {
@@ -213,21 +205,21 @@ function addRow(name?: string, value?: string) {
   fieldDiv.classList.add('field', 'removable');
 
   const nameInput = document.createElement('input');
-  nameInput.setAttribute('type', 'text');
-  nameInput.setAttribute('placeholder', 'Name');
+  nameInput.type = 'text';
+  nameInput.placeholder = 'Name';
   nameInput.classList.add('name');
   nameInput.value = resolvedName;
 
   const valueInput = document.createElement('input');
-  valueInput.setAttribute('type', 'number');
-  valueInput.setAttribute('placeholder', '0');
+  valueInput.type = 'number';
+  valueInput.placeholder = '0';
   valueInput.classList.add('value');
   valueInput.value = resolvedValue;
   valueInput.addEventListener('input', () => checkDataInputValue(valueInput));
 
   const removeBtn = document.createElement('button');
   removeBtn.classList.add('remove-btn');
-  removeBtn.setAttribute('type', 'button');
+  removeBtn.type = 'button';
   removeBtn.appendChild(createRemoveIcon());
   removeBtn.onclick = () => { fieldDiv.remove(); triggerPreview(); };
 
@@ -245,20 +237,13 @@ addMoreBtn.addEventListener('click', () => {
 // ── Submit ────────────────────────────────────────────────────────────────────
 
 submitBtn.addEventListener('click', () => {
-  const fd = getFormData();
-  parent.postMessage({
-    pluginMessage: {
-      type: 'submitData',
-      data: { ...fd, rounding: 0 },
-    },
-  }, '*');
+  parent.postMessage({ pluginMessage: { type: 'submitData', data: getFormData() } }, '*');
 });
 
 // ── Remove field (inline onclick handler in HTML) ─────────────────────────────
 
 function removeField(btn: HTMLElement) {
-  const field = btn.closest('.field') as HTMLElement;
-  field.remove();
+  (btn.closest('.field') as HTMLElement).remove();
   triggerPreview();
 }
 
@@ -270,11 +255,11 @@ const minValueInput = document.getElementById('minValue') as HTMLInputElement;
 const maxValueInput = document.getElementById('maxValue') as HTMLInputElement;
 
 function updateDataInputConstraints() {
-  const minValue = parseFloat(minValueInput.value);
-  const maxValue = parseFloat(maxValueInput.value);
-  document.querySelectorAll<HTMLInputElement>('.value').forEach(input => {
-    input.setAttribute('min', String(minValue));
-    input.setAttribute('max', String(maxValue));
+  const min = parseFloat(minValueInput.value);
+  const max = parseFloat(maxValueInput.value);
+  form.querySelectorAll<HTMLInputElement>('.value').forEach(input => {
+    input.setAttribute('min', String(min));
+    input.setAttribute('max', String(max));
   });
 }
 
@@ -288,26 +273,19 @@ maxValueInput.addEventListener('input', updateDataInputConstraints);
 function checkDataInputValue(input: HTMLInputElement) {
   let value = parseFloat(input.value);
   if (isNaN(value)) return;
-
-  // Clamp below zero
-  if (value < 0) {
-    value = 0;
-    input.value = '0';
-  }
-
-  const maxValue = parseFloat(maxValueInput.value);
-
-  // Auto-extend max if value exceeds it
-  if (value > maxValue) {
-    const newMax = Math.ceil(value / 10) * 10;
-    maxValueInput.value = String(newMax);
+  if (value < 0) { value = 0; input.value = '0'; }
+  const max = parseFloat(maxValueInput.value);
+  if (value > max) {
+    maxValueInput.value = String(Math.ceil(value / 10) * 10);
     updateDataInputConstraints();
   }
 }
 
-document.querySelectorAll<HTMLInputElement>('.value').forEach(input => {
+form.querySelectorAll<HTMLInputElement>('.value').forEach(input => {
   input.addEventListener('input', () => checkDataInputValue(input));
 });
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
 
 function isValidHex(hex: string): boolean {
   return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex);
@@ -334,6 +312,17 @@ const tabs = document.querySelectorAll<HTMLButtonElement>('.tab');
 
 let activeTab: 'csv' | 'json' = 'csv';
 
+function switchTab(target: 'csv' | 'json') {
+  activeTab = target;
+  tabs.forEach(t => t.classList.toggle('active', t.dataset['tab'] === target));
+  csvHint.hidden = target !== 'csv';
+  jsonHint.hidden = target !== 'json';
+  importInput.placeholder = target === 'csv'
+    ? 'Name,Value\nSpeed,80\nStrength,60'
+    : '[{"name":"Speed","value":80}]';
+  importError.hidden = true;
+}
+
 openImportBtn.addEventListener('click', () => {
   importModal.removeAttribute('hidden');
   importInput.value = '';
@@ -341,26 +330,11 @@ openImportBtn.addEventListener('click', () => {
   importInput.focus();
 });
 
-closeImportBtn.addEventListener('click', () => {
-  importModal.setAttribute('hidden', '');
-});
-
-importModal.addEventListener('click', (e) => {
-  if (e.target === importModal) importModal.setAttribute('hidden', '');
-});
+closeImportBtn.addEventListener('click', () => importModal.setAttribute('hidden', ''));
+importModal.addEventListener('click', (e) => { if (e.target === importModal) importModal.setAttribute('hidden', ''); });
 
 tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    activeTab = tab.dataset['tab'] as 'csv' | 'json';
-    csvHint.hidden = activeTab !== 'csv';
-    jsonHint.hidden = activeTab !== 'json';
-    importInput.placeholder = activeTab === 'csv'
-      ? 'Name,Value\nSpeed,80\nStrength,60'
-      : '[{"name":"Speed","value":80}]';
-    importError.hidden = true;
-  });
+  tab.addEventListener('click', () => switchTab(tab.dataset['tab'] as 'csv' | 'json'));
 });
 
 // ── File upload + drag-and-drop ───────────────────────────────────────────────
@@ -371,19 +345,11 @@ const importFileName = document.getElementById('importFileName') as HTMLSpanElem
 function loadFileText(file: File) {
   const reader = new FileReader();
   reader.onload = () => {
-    const text = (reader.result as string).trim();
-    importInput.value = text;
+    importInput.value = (reader.result as string).trim();
     importFileName.textContent = file.name;
     importError.hidden = true;
-    // Auto-switch tab based on extension
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (ext === 'json' || ext === 'csv') {
-      const target = ext as 'csv' | 'json';
-      tabs.forEach(t => t.classList.toggle('active', t.dataset['tab'] === target));
-      activeTab = target;
-      csvHint.hidden = target !== 'csv';
-      jsonHint.hidden = target !== 'json';
-    }
+    if (ext === 'csv' || ext === 'json') switchTab(ext);
   };
   reader.readAsText(file);
 }
@@ -391,18 +357,11 @@ function loadFileText(file: File) {
 importFileInput.addEventListener('change', () => {
   const file = importFileInput.files?.[0];
   if (file) loadFileText(file);
-  importFileInput.value = ''; // reset so same file can be re-selected
+  importFileInput.value = '';
 });
 
-importInput.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  importInput.classList.add('drag-over');
-});
-
-importInput.addEventListener('dragleave', () => {
-  importInput.classList.remove('drag-over');
-});
-
+importInput.addEventListener('dragover', (e) => { e.preventDefault(); importInput.classList.add('drag-over'); });
+importInput.addEventListener('dragleave', () => importInput.classList.remove('drag-over'));
 importInput.addEventListener('drop', (e) => {
   e.preventDefault();
   importInput.classList.remove('drag-over');
@@ -412,10 +371,7 @@ importInput.addEventListener('drop', (e) => {
 
 importApplyBtn.addEventListener('click', () => {
   const text = importInput.value.trim();
-  if (!text) {
-    showImportError('Please paste some data first.');
-    return;
-  }
+  if (!text) { showImportError('Please paste some data first.'); return; }
 
   let rows: { name: string; value: number }[];
   try {
@@ -425,37 +381,10 @@ importApplyBtn.addEventListener('click', () => {
     return;
   }
 
-  if (rows.length < 3) {
-    showImportError('Need at least 3 data points for a radar chart.');
-    return;
-  }
+  if (rows.length < 3) { showImportError('Need at least 3 data points for a radar chart.'); return; }
 
-  // Clear existing rows
   form.innerHTML = '';
-
-  // Populate with imported rows — first 3 are non-removable
-  rows.forEach((row, i) => {
-    if (i < 3) {
-      const fieldDiv = document.createElement('div');
-      fieldDiv.classList.add('field');
-      const nameInput = document.createElement('input');
-      nameInput.type = 'text';
-      nameInput.placeholder = 'Name';
-      nameInput.classList.add('name');
-      nameInput.value = row.name;
-      const valueInput = document.createElement('input');
-      valueInput.type = 'number';
-      valueInput.placeholder = '0';
-      valueInput.classList.add('value');
-      valueInput.value = String(row.value);
-      valueInput.addEventListener('input', () => checkDataInputValue(valueInput));
-      fieldDiv.appendChild(nameInput);
-      fieldDiv.appendChild(valueInput);
-      form.appendChild(fieldDiv);
-    } else {
-      addRow(row.name, String(row.value));
-    }
-  });
+  rows.forEach(row => addRow(row.name, String(row.value)));
 
   importModal.setAttribute('hidden', '');
   triggerPreview();

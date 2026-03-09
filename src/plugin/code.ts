@@ -16,8 +16,7 @@ figma.ui.onmessage = async msg => {
   if (msg.type === 'submitData') {
     const inputData: RadarGraphInput = {
       color: msg.data.color,
-      gridColor: msg.data.gridColor || '#F1F1F1',
-      rounding: msg.data.rounding,
+      gridColor: msg.data.gridColor || '#E5E7EB',
       minValue: msg.data.minValue,
       maxValue: msg.data.maxValue,
       dataSets: msg.data.dataSets,
@@ -38,7 +37,6 @@ type DataSet = {
 type RadarGraphInput = {
   color: string;
   gridColor: string;
-  rounding: number;
   minValue: number;
   maxValue: number;
   dataSets: DataSet[];
@@ -46,58 +44,48 @@ type RadarGraphInput = {
   showDataPoints: boolean;
 };
 
+function buildPolygonSegments(count: number) {
+  return Array(count - 1).fill(0).map((_, i) => ({ start: i, end: i + 1 }))
+    .concat({ start: count - 1, end: 0 });
+}
 
 // Create the radar graph based on the given input
 async function createRadarGraph(input: RadarGraphInput) {
-  
-  //Awaiting font load for text
-  await figma.loadFontAsync({ family: "Inter", style: "Bold" });
-  await figma.loadFontAsync({ family: "Inter", style: "Medium" });
-  await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-  
+
+  // Load all fonts in parallel
+  await Promise.all([
+    figma.loadFontAsync({ family: "Inter", style: "Bold" }),
+    figma.loadFontAsync({ family: "Inter", style: "Medium" }),
+    figma.loadFontAsync({ family: "Inter", style: "Regular" }),
+  ]);
+
   const color = hexToRgb(input.color);
-
-  const cornerRadius = input.rounding;
-
   const spiderPolygonColor = hexToRgb(input.gridColor);
   const frameSize = 500;
-  const centerX = 250; //frameSize / 2;
-  const centerY = 250; //frameSize / 2;
-  const maxRadius = 200 //frameSize / 2;
-
+  const centerX = frameSize / 2;
+  const centerY = frameSize / 2;
+  const maxRadius = frameSize * 0.4;
   const scaleDivision = (input.maxValue - input.minValue) / 5;
 
-// Create a new frame for the radar graph
-const frame = figma.createFrame();
-frame.name = 'Radar Chart';
-frame.resize(frameSize, frameSize);
+  // Create a new frame for the radar graph
+  const frame = figma.createFrame();
+  frame.name = 'Radar Chart';
+  frame.resize(frameSize, frameSize);
 
-if (figma.editorType === 'figma') {
-  frame.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-}
-else if(figma.editorType === 'figjam'){
-  frame.fills = [];
-}
+  if (figma.editorType === 'figma') {
+    frame.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+  } else if (figma.editorType === 'figjam') {
+    frame.fills = [];
+  }
 
-// Get the current viewport center
-const viewportCenterX = figma.viewport.center.x;
-const viewportCenterY = figma.viewport.center.y;
-
-// Adjust the position of the radar chart frame to the viewport center
-frame.x = viewportCenterX - frame.width / 2;
-frame.y = viewportCenterY - frame.height / 2;
-
-// Other settings and appending the frame
-frame.constraints = {
-    horizontal: "SCALE",
-    vertical: "SCALE"
-};
-figma.currentPage.appendChild(frame);
+  frame.x = figma.viewport.center.x - frameSize / 2;
+  frame.y = figma.viewport.center.y - frameSize / 2;
+  frame.constraints = { horizontal: "SCALE", vertical: "SCALE" };
+  figma.currentPage.appendChild(frame);
 
   const totalDataSets = input.dataSets.length;
   const angleIncrement = (2 * Math.PI) / totalDataSets;
 
-  // Helper function to get a point on a circle given an angle and radius
   function getPointOnCircle(angle: number, radius: number) {
     return {
       x: centerX + radius * Math.cos(angle),
@@ -114,8 +102,8 @@ figma.currentPage.appendChild(frame);
     radarPolygonPoints.push(`${point.x},${point.y}`);
   }
 
-  let divisionMultipler = 1;
-  
+  let divisionMultiplier = 1;
+
   // Draw spider-web pattern
   for (let i = 0.2; i <= 1; i += 0.2) {
     const polygonPoints: string[] = [];
@@ -123,167 +111,104 @@ figma.currentPage.appendChild(frame);
       const angle = j * angleIncrement + (3 * Math.PI / 2);
       const point = getPointOnCircle(angle, i * maxRadius);
 
-      // Create text labels for the data scale
-      if(input.showDataValue) {
-      if(j==0){
-        const labelOffset = -15; // Adjust as necessary
+      // Scale labels on the first axis
+      if (input.showDataValue && j === 0) {
+        const labelOffset = -15;
         const labelText = figma.createText();
-        if(i==0.2){
+        if (i === 0.2) {
           labelText.characters = String(input.minValue + scaleDivision);
-        }
-        else if(i==1){
+        } else if (i === 1) {
           labelText.characters = String(input.maxValue);
+        } else {
+          labelText.characters = String(Number((input.minValue + (scaleDivision * divisionMultiplier)).toFixed(1)));
         }
-        else{
-          // limiting the decimal place of the values to 1
-          const labelValue = Number((input.minValue +(scaleDivision * divisionMultipler)).toFixed(1));
-          labelText.characters = String(labelValue);
-        }
-        //labelText.characters = String(input.dataSets[j].value);
         labelText.fontName = { family: "Inter", style: "Bold" };
         labelText.fontSize = 12;
         labelText.fills = [{ type: 'SOLID', color: spiderPolygonColor }];
         labelText.x = point.x + Math.cos(angle) * labelOffset - labelText.width / 2;
         labelText.y = point.y + Math.sin(angle) * labelOffset - labelText.height / 2;
-        labelText.constraints = {
-          horizontal: "SCALE",
-          vertical: "SCALE"
-      };
+        labelText.constraints = { horizontal: "SCALE", vertical: "SCALE" };
         frame.appendChild(labelText);
-        divisionMultipler++;
+        divisionMultiplier++;
       }
-      }
-      if (i == 1) {
-        // Creating text labels
 
-        const labelOffset = 25; // Adjust as necessary
+      // Axis name labels on outermost ring
+      if (i === 1) {
+        const labelOffset = 25;
         const labelText = figma.createText();
         labelText.characters = input.dataSets[j].name;
         labelText.fontName = { family: "Inter", style: "Medium" };
         labelText.fontSize = 12;
         labelText.x = point.x + Math.cos(angle) * labelOffset - labelText.width / 2;
         labelText.y = point.y + Math.sin(angle) * labelOffset - labelText.height / 2;
-        labelText.constraints = {
-          horizontal: "SCALE",
-          vertical: "SCALE"
-      };
+        labelText.constraints = { horizontal: "SCALE", vertical: "SCALE" };
         frame.appendChild(labelText);
-
       }
+
       polygonPoints.push(`${point.x},${point.y}`);
 
-      // Creating lines from center to the circle
-      if(!input.showDataValue){
-      if (i === 1) {
+      // Radial lines from center (when scale labels are hidden)
+      if (!input.showDataValue && i === 1) {
         const vector = figma.createVector();
         await vector.setVectorNetworkAsync({
-          vertices: [
-            { x: centerX, y: centerY },
-            { x: point.x, y: point.y }
-          ],
+          vertices: [{ x: centerX, y: centerY }, { x: point.x, y: point.y }],
           segments: [{ start: 0, end: 1 }]
         });
         vector.strokes = [{ type: 'SOLID', color: spiderPolygonColor }];
         vector.strokeWeight = 2;
+        vector.constraints = { horizontal: "SCALE", vertical: "SCALE" };
         frame.appendChild(vector);
-        vector.constraints = {
-          horizontal: "SCALE",
-          vertical: "SCALE"
-        };
       }
     }
-    }
 
-    //Create the spider polygon
+    // Spider ring polygon
     const vectorPolygon = figma.createVector();
-    await vectorPolygon.setVectorNetworkAsync({
-      vertices: polygonPoints.map(point => {
-        const [x, y] = point.split(',').map(Number);
-        return { x, y };
-      }),
-      segments: Array(polygonPoints.length - 1).fill(0).map((_, i) => {
-        return { start: i, end: i + 1 };
-      }).concat({ start: polygonPoints.length - 1, end: 0 }) // To close the polygon
-    });
-
+    const vertices = polygonPoints.map(p => { const [x, y] = p.split(',').map(Number); return { x, y }; });
+    await vectorPolygon.setVectorNetworkAsync({ vertices, segments: buildPolygonSegments(vertices.length) });
     vectorPolygon.strokes = [{ type: 'SOLID', color: spiderPolygonColor }];
     vectorPolygon.strokeWeight = 2;
     vectorPolygon.strokeJoin = "ROUND";
-
+    vectorPolygon.constraints = { horizontal: "SCALE", vertical: "SCALE" };
     frame.appendChild(vectorPolygon);
-    vectorPolygon.constraints = {
-      horizontal: "SCALE",
-      vertical: "SCALE"
-    };
   }
 
-  // Draw radar chart polygon for fill
+  // Shared vertices for data polygon
+  const radarVertices = radarPolygonPoints.map(p => { const [x, y] = p.split(',').map(Number); return { x, y }; });
+  const radarSegments = buildPolygonSegments(radarVertices.length);
+
+  // Data polygon — fill
   const radarFillPolygon = figma.createVector();
-  await radarFillPolygon.setVectorNetworkAsync({
-    vertices: radarPolygonPoints.map(point => {
-      const [x, y] = point.split(',').map(Number);
-      return { x, y };
-    }),
-    segments: Array(radarPolygonPoints.length - 1).fill(0).map((_, i) => {
-      return { start: i, end: i + 1 };
-    }).concat({ start: radarPolygonPoints.length - 1, end: 0 }) // To close the polygon
-  });
+  await radarFillPolygon.setVectorNetworkAsync({ vertices: radarVertices, segments: radarSegments });
   radarFillPolygon.fills = [{ type: 'SOLID', color: color }];
   radarFillPolygon.opacity = 0.3;
-  radarFillPolygon.cornerRadius = cornerRadius;
-  
+  radarFillPolygon.constraints = { horizontal: "SCALE", vertical: "SCALE" };
   frame.appendChild(radarFillPolygon);
-  radarFillPolygon.constraints = {
-    horizontal: "SCALE",
-    vertical: "SCALE"
-  };
 
-  // Draw radar chart polygon for stroke
+  // Data polygon — stroke
   const radarStrokePolygon = figma.createVector();
-  //radarStrokePolygon.vectorNetwork = radarFillPolygon.vectorNetwork; // Use the same network
-  await radarStrokePolygon.setVectorNetworkAsync({
-    vertices: radarPolygonPoints.map(point => {
-      const [x, y] = point.split(',').map(Number);
-      return { x, y };
-    }),
-    segments: Array(radarPolygonPoints.length - 1).fill(0).map((_, i) => {
-      return { start: i, end: i + 1 };
-    }).concat({ start: radarPolygonPoints.length - 1, end: 0 }) // To close the polygon
-  });
-
+  await radarStrokePolygon.setVectorNetworkAsync({ vertices: radarVertices, segments: radarSegments });
   radarStrokePolygon.strokes = [{ type: 'SOLID', color: color }];
   radarStrokePolygon.strokeWeight = 4;
   radarStrokePolygon.strokeJoin = "ROUND";
-  radarStrokePolygon.cornerRadius = cornerRadius;
-
-
+  radarStrokePolygon.constraints = { horizontal: "SCALE", vertical: "SCALE" };
   frame.appendChild(radarStrokePolygon);
-  radarStrokePolygon.constraints = {
-    horizontal: "SCALE",
-    vertical: "SCALE"
-  };
 
-  if(input.showDataPoints){
-  // Draw circles on data points
-  for (let i = 0; i < totalDataSets; i++) {
-    const dataSet = input.dataSets[i];
-    const radius = ((dataSet.value - input.minValue) / (input.maxValue - input.minValue)) * maxRadius;
-    const angle = i * angleIncrement + (3 * Math.PI / 2);
-    const point = getPointOnCircle(angle, radius);
-
-    // Draw circle on each data point
-    const circle = figma.createEllipse();
-    circle.resize(12, 12);
-    circle.x = point.x - 6; // Adjust for circle's size
-    circle.y = point.y - 6;
-    circle.fills = [{ type: 'SOLID', color: color }];
-    frame.appendChild(circle);
-    circle.constraints = {
-      horizontal: "SCALE",
-      vertical: "SCALE"
-    };
+  // Data point circles
+  if (input.showDataPoints) {
+    for (let i = 0; i < totalDataSets; i++) {
+      const dataSet = input.dataSets[i];
+      const radius = ((dataSet.value - input.minValue) / (input.maxValue - input.minValue)) * maxRadius;
+      const angle = i * angleIncrement + (3 * Math.PI / 2);
+      const point = getPointOnCircle(angle, radius);
+      const circle = figma.createEllipse();
+      circle.resize(12, 12);
+      circle.x = point.x - 6;
+      circle.y = point.y - 6;
+      circle.fills = [{ type: 'SOLID', color: color }];
+      circle.constraints = { horizontal: "SCALE", vertical: "SCALE" };
+      frame.appendChild(circle);
+    }
   }
-}
 }
 
 function hexToRgb(hex: string): { r: number, g: number, b: number } {

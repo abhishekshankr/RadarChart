@@ -20,9 +20,8 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 
 export function renderPreview(canvas: HTMLCanvasElement, data: PreviewData) {
   const ctx = canvas.getContext('2d')!;
-  // Use CSS display size for all math (canvas pixel buffer is dpr× larger,
-  // but the context has already been scaled in setupCanvas).
-  const size = parseFloat(canvas.style.width) || canvas.width;
+  // Use CSS display size for all math; the context is already scaled by dpr in setupCanvas.
+  const size = parseFloat(canvas.style.width) || (canvas.width / (window.devicePixelRatio || 1));
   const cx = size / 2;
   const cy = size / 2;
   const maxR = size * 0.38;

@@ -617,7 +617,7 @@ input[type=number]:focus {
         <p class="section-title">Options</p>
         <div class="section-body toggles">
           <label class="toggle-row">
-            <span class="toggle-label-text">Show Scale</span>
+            <span class="toggle-label-text">Gridlines</span>
             <button class="toggle-pill" id="showDataValue" role="switch" aria-checked="true" type="button"></button>
           </label>
           <label class="toggle-row">
@@ -674,26 +674,6 @@ input[type=number]:focus {
 
   <script>"use strict";
 (() => {
-  var __defProp = Object.defineProperty;
-  var __defProps = Object.defineProperties;
-  var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
-  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
-  var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __propIsEnum = Object.prototype.propertyIsEnumerable;
-  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-  var __spreadValues = (a, b) => {
-    for (var prop in b || (b = {}))
-      if (__hasOwnProp.call(b, prop))
-        __defNormalProp(a, prop, b[prop]);
-    if (__getOwnPropSymbols)
-      for (var prop of __getOwnPropSymbols(b)) {
-        if (__propIsEnum.call(b, prop))
-          __defNormalProp(a, prop, b[prop]);
-      }
-    return a;
-  };
-  var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-
   // src/ui/preview.ts
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -706,7 +686,7 @@ input[type=number]:focus {
   }
   function renderPreview(canvas, data) {
     const ctx = canvas.getContext("2d");
-    const size = parseFloat(canvas.style.width) || canvas.width;
+    const size = parseFloat(canvas.style.width) || canvas.width / (window.devicePixelRatio || 1);
     const cx = size / 2;
     const cy = size / 2;
     const maxR = size * 0.38;
@@ -836,10 +816,9 @@ input[type=number]:focus {
   function setToggle(btn, on) {
     btn.setAttribute("aria-checked", String(on));
   }
-  function wireToggle(btn, onKey) {
+  function wireToggle(btn) {
     btn.addEventListener("click", () => {
-      const next = !isToggleOn(btn);
-      setToggle(btn, next);
+      setToggle(btn, !isToggleOn(btn));
       savePrefs();
       triggerPreview();
     });
@@ -867,8 +846,8 @@ input[type=number]:focus {
       triggerPreview();
     }
   });
-  wireToggle(showDataValueToggle, "showDataValue");
-  wireToggle(showDataPointsToggle, "showDataPoints");
+  wireToggle(showDataValueToggle);
+  wireToggle(showDataPointsToggle);
   function setupCanvas() {
     const wrap = previewCanvas.parentElement;
     const dpr = window.devicePixelRatio || 1;
@@ -877,36 +856,30 @@ input[type=number]:focus {
     previewCanvas.style.height = cssSize + "px";
     previewCanvas.width = Math.round(cssSize * dpr);
     previewCanvas.height = Math.round(cssSize * dpr);
-    const ctx = previewCanvas.getContext("2d");
-    ctx.scale(dpr, dpr);
+    previewCanvas.getContext("2d").scale(dpr, dpr);
   }
   function getFormData() {
     const minValue = parseFloat(document.getElementById("minValue").value) || 0;
     const maxValue = parseFloat(document.getElementById("maxValue").value) || 100;
     const color = document.getElementById("colorHex").value || "#6366f1";
+    const gridColor = gridColorHex.value || "#E5E7EB";
     const dataSets = [];
-    const names = document.querySelectorAll(".name");
-    const values = document.querySelectorAll(".value");
+    const names = form.querySelectorAll(".name");
+    const values = form.querySelectorAll(".value");
     for (let i = 0; i < names.length; i++) {
       dataSets.push({ name: names[i].value, value: Number(values[i].value) });
     }
-    const gridColor = document.getElementById("gridColorHex").value || "#E5E7EB";
     return {
       color,
       gridColor,
       minValue,
       maxValue,
       dataSets,
-      showDataValue: isToggleOn(showDataValueToggle),
+      showDataValue: !isToggleOn(showDataValueToggle),
       showDataPoints: isToggleOn(showDataPointsToggle)
     };
   }
-  var canvasReady = false;
   function triggerPreview() {
-    if (!canvasReady) {
-      setupCanvas();
-      canvasReady = true;
-    }
     renderPreview(previewCanvas, getFormData());
   }
   var colorSquare = document.getElementById("colorSquare");
@@ -931,8 +904,8 @@ input[type=number]:focus {
   var gridColorSquare = document.getElementById("gridColorSquare");
   var gridColorInput = document.getElementById("gridColor");
   var gridColorHex = document.getElementById("gridColorHex");
-  var DEFAULT_GRID_COLOR = "#E5E7EB";
   var resetGridColorBtn = document.getElementById("resetGridColor");
+  var DEFAULT_GRID_COLOR = "#E5E7EB";
   function applyGridColor(hex) {
     gridColorSquare.style.backgroundColor = hex;
     gridColorInput.value = hex;
@@ -958,27 +931,26 @@ input[type=number]:focus {
     savePrefs();
     triggerPreview();
   });
-  document.addEventListener("input", triggerPreview);
+  setupCanvas();
   triggerPreview();
+  form.addEventListener("input", triggerPreview);
   function createRemoveIcon() {
-    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgElement.setAttribute("viewBox", "0 0 14 14");
-    svgElement.setAttribute("fill", "none");
-    svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    const svgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    svgPath.setAttribute("d", "M1 1l12 12M13 1L1 13");
-    svgPath.setAttribute("stroke", "currentColor");
-    svgPath.setAttribute("stroke-width", "1.75");
-    svgPath.setAttribute("stroke-linecap", "round");
-    svgElement.appendChild(svgPath);
-    return svgElement;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 14 14");
+    svg.setAttribute("fill", "none");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M1 1l12 12M13 1L1 13");
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "1.75");
+    path.setAttribute("stroke-linecap", "round");
+    svg.appendChild(path);
+    return svg;
   }
   function randomRowDefaults() {
-    const n = document.querySelectorAll(".field").length + 1;
+    const n = form.querySelectorAll(".field").length + 1;
     const min = parseFloat(minValueInput.value) || 0;
     const max = parseFloat(maxValueInput.value) || 100;
-    const value = String(Math.round(min + Math.random() * (max - min)));
-    return { name: `Data ${n}`, value };
+    return { name: `Data ${n}`, value: String(Math.round(min + Math.random() * (max - min))) };
   }
   function addRow(name, value) {
     const defaults = randomRowDefaults();
@@ -987,19 +959,19 @@ input[type=number]:focus {
     const fieldDiv = document.createElement("div");
     fieldDiv.classList.add("field", "removable");
     const nameInput = document.createElement("input");
-    nameInput.setAttribute("type", "text");
-    nameInput.setAttribute("placeholder", "Name");
+    nameInput.type = "text";
+    nameInput.placeholder = "Name";
     nameInput.classList.add("name");
     nameInput.value = resolvedName;
     const valueInput = document.createElement("input");
-    valueInput.setAttribute("type", "number");
-    valueInput.setAttribute("placeholder", "0");
+    valueInput.type = "number";
+    valueInput.placeholder = "0";
     valueInput.classList.add("value");
     valueInput.value = resolvedValue;
     valueInput.addEventListener("input", () => checkDataInputValue(valueInput));
     const removeBtn = document.createElement("button");
     removeBtn.classList.add("remove-btn");
-    removeBtn.setAttribute("type", "button");
+    removeBtn.type = "button";
     removeBtn.appendChild(createRemoveIcon());
     removeBtn.onclick = () => {
       fieldDiv.remove();
@@ -1015,28 +987,21 @@ input[type=number]:focus {
     triggerPreview();
   });
   submitBtn.addEventListener("click", () => {
-    const fd = getFormData();
-    parent.postMessage({
-      pluginMessage: {
-        type: "submitData",
-        data: __spreadProps(__spreadValues({}, fd), { rounding: 0 })
-      }
-    }, "*");
+    parent.postMessage({ pluginMessage: { type: "submitData", data: getFormData() } }, "*");
   });
   function removeField(btn) {
-    const field = btn.closest(".field");
-    field.remove();
+    btn.closest(".field").remove();
     triggerPreview();
   }
   window["removeField"] = removeField;
   var minValueInput = document.getElementById("minValue");
   var maxValueInput = document.getElementById("maxValue");
   function updateDataInputConstraints() {
-    const minValue = parseFloat(minValueInput.value);
-    const maxValue = parseFloat(maxValueInput.value);
-    document.querySelectorAll(".value").forEach((input) => {
-      input.setAttribute("min", String(minValue));
-      input.setAttribute("max", String(maxValue));
+    const min = parseFloat(minValueInput.value);
+    const max = parseFloat(maxValueInput.value);
+    form.querySelectorAll(".value").forEach((input) => {
+      input.setAttribute("min", String(min));
+      input.setAttribute("max", String(max));
     });
   }
   minValueInput.addEventListener("input", () => {
@@ -1052,14 +1017,13 @@ input[type=number]:focus {
       value = 0;
       input.value = "0";
     }
-    const maxValue = parseFloat(maxValueInput.value);
-    if (value > maxValue) {
-      const newMax = Math.ceil(value / 10) * 10;
-      maxValueInput.value = String(newMax);
+    const max = parseFloat(maxValueInput.value);
+    if (value > max) {
+      maxValueInput.value = String(Math.ceil(value / 10) * 10);
       updateDataInputConstraints();
     }
   }
-  document.querySelectorAll(".value").forEach((input) => {
+  form.querySelectorAll(".value").forEach((input) => {
     input.addEventListener("input", () => checkDataInputValue(input));
   });
   function isValidHex(hex) {
@@ -1081,28 +1045,26 @@ input[type=number]:focus {
   var jsonHint = document.getElementById("jsonHint");
   var tabs = document.querySelectorAll(".tab");
   var activeTab = "csv";
+  function switchTab(target) {
+    activeTab = target;
+    tabs.forEach((t) => t.classList.toggle("active", t.dataset["tab"] === target));
+    csvHint.hidden = target !== "csv";
+    jsonHint.hidden = target !== "json";
+    importInput.placeholder = target === "csv" ? "Name,Value\nSpeed,80\nStrength,60" : '[{"name":"Speed","value":80}]';
+    importError.hidden = true;
+  }
   openImportBtn.addEventListener("click", () => {
     importModal.removeAttribute("hidden");
     importInput.value = "";
     importError.hidden = true;
     importInput.focus();
   });
-  closeImportBtn.addEventListener("click", () => {
-    importModal.setAttribute("hidden", "");
-  });
+  closeImportBtn.addEventListener("click", () => importModal.setAttribute("hidden", ""));
   importModal.addEventListener("click", (e) => {
     if (e.target === importModal) importModal.setAttribute("hidden", "");
   });
   tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((t) => t.classList.remove("active"));
-      tab.classList.add("active");
-      activeTab = tab.dataset["tab"];
-      csvHint.hidden = activeTab !== "csv";
-      jsonHint.hidden = activeTab !== "json";
-      importInput.placeholder = activeTab === "csv" ? "Name,Value\nSpeed,80\nStrength,60" : '[{"name":"Speed","value":80}]';
-      importError.hidden = true;
-    });
+    tab.addEventListener("click", () => switchTab(tab.dataset["tab"]));
   });
   var importFileInput = document.getElementById("importFile");
   var importFileName = document.getElementById("importFileName");
@@ -1110,18 +1072,11 @@ input[type=number]:focus {
     const reader = new FileReader();
     reader.onload = () => {
       var _a;
-      const text = reader.result.trim();
-      importInput.value = text;
+      importInput.value = reader.result.trim();
       importFileName.textContent = file.name;
       importError.hidden = true;
       const ext = (_a = file.name.split(".").pop()) == null ? void 0 : _a.toLowerCase();
-      if (ext === "json" || ext === "csv") {
-        const target = ext;
-        tabs.forEach((t) => t.classList.toggle("active", t.dataset["tab"] === target));
-        activeTab = target;
-        csvHint.hidden = target !== "csv";
-        jsonHint.hidden = target !== "json";
-      }
+      if (ext === "csv" || ext === "json") switchTab(ext);
     };
     reader.readAsText(file);
   }
@@ -1135,9 +1090,7 @@ input[type=number]:focus {
     e.preventDefault();
     importInput.classList.add("drag-over");
   });
-  importInput.addEventListener("dragleave", () => {
-    importInput.classList.remove("drag-over");
-  });
+  importInput.addEventListener("dragleave", () => importInput.classList.remove("drag-over"));
   importInput.addEventListener("drop", (e) => {
     var _a;
     e.preventDefault();
@@ -1163,28 +1116,7 @@ input[type=number]:focus {
       return;
     }
     form.innerHTML = "";
-    rows.forEach((row, i) => {
-      if (i < 3) {
-        const fieldDiv = document.createElement("div");
-        fieldDiv.classList.add("field");
-        const nameInput = document.createElement("input");
-        nameInput.type = "text";
-        nameInput.placeholder = "Name";
-        nameInput.classList.add("name");
-        nameInput.value = row.name;
-        const valueInput = document.createElement("input");
-        valueInput.type = "number";
-        valueInput.placeholder = "0";
-        valueInput.classList.add("value");
-        valueInput.value = String(row.value);
-        valueInput.addEventListener("input", () => checkDataInputValue(valueInput));
-        fieldDiv.appendChild(nameInput);
-        fieldDiv.appendChild(valueInput);
-        form.appendChild(fieldDiv);
-      } else {
-        addRow(row.name, String(row.value));
-      }
-    });
+    rows.forEach((row) => addRow(row.name, String(row.value)));
     importModal.setAttribute("hidden", "");
     triggerPreview();
   });
