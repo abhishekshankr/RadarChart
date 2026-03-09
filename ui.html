@@ -1,455 +1,1130 @@
 <head>
-  <title>Radar Chart UI</title>
-  <style>
-    :root {
-      --button-color: #1a70e2;
-      --hover-color: #0c5fbd;
-      --hover-color-strokbtn: #ebf4ff;
-      --hover-color-svg: #e5150d;
-    }
-
-    body {
-      font-family: Inter;
-      font-size: 12px;
-    }
-
-    label {
-      font-size: 11px;
-      font-weight: 400;
-    }
-
-    .section-title {
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    /* Basic styles for the form */
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    /* Styling for side-by-side inputs */
-    .side-by-side {
-      margin-top: 8px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .category {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      gap: 10px;
-      align-self: stretch;
-      margin-top: 8px;
-    }
-
-    .field {
-      width: 100%;
-      display: flex;
-      justify-content: flex-start;
-      gap: 10px;
-      align-self: stretch;
-    }
-
-    .removable {
-      width: 100%;
-      display: flex;
-      justify-content: flex-start;
-      gap: 10px;
-      align-items: center;
-
-    }
-
-    .remove-btn {
-      width: 24px;
-      height: 24px;
-      background: none;
-      border: none;
-      padding: 0;
-      margin: 0px;
-      cursor: pointer;
-    }
-
-    .remove-btn svg {
-      display: flex;
-      width: 100%;
-      height: 100%;
-    }
-
-    .remove-btn:hover svg path {
-      fill: var(--hover-color-svg);
-      transition: fill 0.2s ease;
-    }
-
-
-    input[type="text"],
-    input[type="number"] {
-      flex: 1;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 12px;
-    }
-
-    button {
-      padding: 10px 12px;
-      margin: 8px 0px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      background-color: var(--button-color);
-      color: white;
-    }
-
-    .cta {
-      padding: 12px;
-      width: 100%;
-    }
-
-    .cta:hover {
-      background-color: var(--hover-color);
-      transition: background-color 0.2s ease;
-    }
-
-    .stroke-button {
-      margin-top: 16px;
-      width: 100%;
-      background-color: #ffffff;
-      border: 1px solid var(--button-color);
-      color: var(--button-color);
-    }
-
-    .stroke-button:hover {
-      background-color: var(--hover-color-strokbtn);
-      transition: background-color 0.2s ease;
-    }
-
-    section {
-      padding: 8px;
-      margin-bottom: 8px;
-    }
-
-    .button-section{
-      background-color: #fff;
-      position: sticky;
-      bottom: 0;
-    }
-
-    .color-picker-container {
-      display: flex;
-      align-items: center;
-    }
-
-    .color-square {
-      display: flex;
-      width: 30px;
-      height: 30px;
-      margin-right: 8px;
-      cursor: pointer;
-      border: 2px solid #fff;
-      outline: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .checkbox-container {
-    display: flex;
-    align-items: center; /* vertically center items */
-    gap: 8px; /* optional: creates a gap between checkbox and label */
-} 
-  </style>
+  <title>Radar Chart</title>
+  <style>/* src/ui/styles.css */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+:root {
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: #eff6ff;
+  --accent-light-hover: #dbeafe;
+  --danger: #ef4444;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-label: #374151;
+  --border: #e5e7eb;
+  --border-focus: #2563eb;
+  --bg: #f9fafb;
+  --bg-card: #ffffff;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --left-width: 300px;
+}
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  overflow: hidden;
+}
+.left-panel {
+  width: var(--left-width);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  background: var(--bg);
+  gap: 10px;
+}
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+}
+.section {
+  padding: 14px 16px;
+}
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.section-body {
+}
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+label.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-label);
+  margin-bottom: 5px;
+}
+input[type=text],
+input[type=number] {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  -moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  opacity: 0.4;
+}
+input[type=text]:focus,
+input[type=number]:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.btn-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+  line-height: 0;
+  visibility: hidden;
+}
+.btn-reset svg {
+  width: 12px;
+  height: 12px;
+}
+.btn-reset:hover {
+  color: var(--text-primary);
+}
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.color-swatch:hover {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+#dataForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.row-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 24px;
+  gap: 6px;
+  padding: 0 2px;
+  margin-bottom: 6px;
+}
+.row-header span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.field {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  align-items: center;
+}
+.field.removable {
+  grid-template-columns: 1fr 1fr 24px;
+}
+.remove-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s;
+  margin: 0;
+}
+.remove-btn:hover {
+  background: #fee2e2;
+  color: var(--danger);
+}
+.remove-btn svg {
+  width: 14px;
+  height: 14px;
+}
+.toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.toggle-label-text {
+  font-size: 12px;
+  color: var(--text-label);
+  user-select: none;
+}
+.toggle-pill {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  border: none;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+.toggle-pill::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.toggle-pill[aria-checked=true] {
+  background: var(--accent);
+}
+.toggle-pill[aria-checked=true]::after {
+  transform: translateX(16px);
+}
+.action-bar {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.btn-primary {
+  width: 100%;
+  padding: 9px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+.btn-ghost {
+  width: 100%;
+  padding: 9px;
+  background: transparent;
+  color: var(--text-label);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
+}
+.btn-ghost:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  background: var(--bg);
+}
+.btn-import {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.btn-import svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.btn-import:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.preview-title {
+  align-self: flex-start;
+  margin-bottom: 0;
+}
+.preview-wrap {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 12px;
+}
+#previewCanvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal-overlay[hidden] {
+  display: none;
+}
+.modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  width: 340px;
+  max-width: calc(100vw - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.tab {
+  flex: 1;
+  padding: 5px 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.tab.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.import-hint {
+  font-size: 10px;
+  color: var(--text-secondary);
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-family:
+    "Menlo",
+    "Monaco",
+    monospace;
+  line-height: 1.6;
+}
+.import-file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-file {
+  padding: 4px 10px;
+  background: var(--bg);
+  color: var(--text-label);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-file:hover {
+  background: var(--border);
+}
+#importFile {
+  display: none;
+}
+.import-file-name {
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+#importInput {
+  width: 100%;
+  height: 110px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family:
+    "Menlo",
+    "Monaco",
+    monospace;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+#importInput:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+#importInput.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.error-msg {
+  font-size: 11px;
+  color: var(--danger);
+}
+.error-msg[hidden] {
+  display: none;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- Styling Section -->
-  <section>
+  <!-- Left panel: form -->
+  <div class="left-panel">
+    <div class="scroll-area">
 
-    <label class="section-title">Styling</label>
-    <div class="side-by-side">
-
-      <div class="category">
-        <label for="colorPicker">Chart Color</label>
-        <div class="color-picker-container">
-          <div class="color-square" id="colorSquare"></div>
-          <input type="color" id="color" style="display:none" />
-          <input type="text" id="colorHex" />
+      <!-- Styling -->
+      <section class="section">
+        <p class="section-title">Styling</p>
+        <div class="section-body grid-2">
+          <div>
+            <label class="field-label">Chart Color</label>
+            <div class="color-row">
+              <div class="color-swatch" id="colorSquare"></div>
+              <input type="color" id="color" style="display:none" />
+              <input type="text" id="colorHex" placeholder="#000000" />
+            </div>
+          </div>
+          <div>
+            <div class="field-label-row">
+              <label class="field-label" style="margin-bottom:0">Grid Color</label>
+              <button class="btn-reset" id="resetGridColor" type="button" title="Reset to default">
+                <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 7a5 5 0 1 0 1.5-3.5L2 2v3h3L3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="color-row">
+              <div class="color-swatch" id="gridColorSquare"></div>
+              <input type="color" id="gridColor" style="display:none" />
+              <input type="text" id="gridColorHex" placeholder="#E5E7EB" />
+            </div>
+          </div>
         </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Data Range -->
+      <section class="section">
+        <p class="section-title">Data Range</p>
+        <div class="section-body grid-2">
+          <div>
+            <label class="field-label">Min Value</label>
+            <input type="number" id="minValue" value="0" />
+          </div>
+          <div>
+            <label class="field-label">Max Value</label>
+            <input type="number" id="maxValue" value="100" />
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Data Points -->
+      <section class="section">
+        <div class="section-header">
+          <p class="section-title" style="margin-bottom:0">Data Points</p>
+          <button class="btn-import" id="openImport" type="button" title="Import data">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3 11v1.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Import
+          </button>
+        </div>
+
+        <div class="row-header">
+          <span>Name</span>
+          <span>Value</span>
+          <span></span>
+        </div>
+
+        <form id="dataForm">
+          <div class="field">
+            <input type="text" value="Data 1" class="name" placeholder="Name" />
+            <input type="number" value="34" class="value" placeholder="0" />
+          </div>
+          <div class="field">
+            <input type="text" value="Data 2" class="name" placeholder="Name" />
+            <input type="number" value="65" class="value" placeholder="0" />
+          </div>
+          <div class="field">
+            <input type="text" value="Data 3" class="name" placeholder="Name" />
+            <input type="number" value="92" class="value" placeholder="0" />
+          </div>
+          <div class="field removable">
+            <input type="text" value="Data 4" class="name" placeholder="Name" />
+            <input type="number" value="92" class="value" placeholder="0" />
+            <button class="remove-btn" onclick="removeField(this)" type="button">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="field removable">
+            <input type="text" value="Data 5" class="name" placeholder="Name" />
+            <input type="number" value="85" class="value" placeholder="0" />
+            <button class="remove-btn" onclick="removeField(this)" type="button">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="field removable">
+            <input type="text" value="Data 6" class="name" placeholder="Name" />
+            <input type="number" value="79" class="value" placeholder="0" />
+            <button class="remove-btn" onclick="removeField(this)" type="button">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Options -->
+      <section class="section">
+        <p class="section-title">Options</p>
+        <div class="section-body toggles">
+          <label class="toggle-row">
+            <span class="toggle-label-text">Gridlines</span>
+            <button class="toggle-pill" id="showDataValue" role="switch" aria-checked="true" type="button"></button>
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label-text">Show Data Points</span>
+            <button class="toggle-pill" id="showDataPoints" role="switch" aria-checked="true" type="button"></button>
+          </label>
+        </div>
+      </section>
+
+    </div><!-- end scroll-area -->
+
+    <!-- Sticky action bar -->
+    <div class="action-bar">
+      <button class="btn-ghost" id="addMore" type="button">+ Add Row</button>
+      <button class="btn-primary" id="submit" type="button">Create Chart</button>
+    </div>
+  </div><!-- end left-panel -->
+
+  <!-- Right panel: live preview -->
+  <div class="right-panel">
+    <p class="section-title preview-title">Preview</p>
+    <div class="preview-wrap">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div id="importModal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Import Data</span>
+        <button id="closeImport" class="remove-btn" type="button">
+          <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+          </svg>
+        </button>
       </div>
-
-      <div class="category">
-        <label for="rounding">Corner Radius</label>
-        <input type="number" min="0" id="rounding" value="2">
+      <div class="tab-bar">
+        <button class="tab active" data-tab="csv" type="button">CSV</button>
+        <button class="tab" data-tab="json" type="button">JSON</button>
       </div>
-
-    </div>
-
-  </section>
-
-  <!-- Data Range Section -->
-  <section>
-    <label class="section-title">Data Range</label>
-    <div class="side-by-side">
-      <div class="category">
-        <label for="minValue">Min Value</label>
-        <input type="number" id="minValue" value="0">
+      <div id="csvHint" class="import-hint">Name,Value<br>Speed,80<br>Strength,60</div>
+      <div id="jsonHint" class="import-hint" hidden>[{"name":"Speed","value":80},...]</div>
+      <div class="import-file-row">
+        <label class="btn-file" for="importFile">Upload file</label>
+        <input type="file" id="importFile" accept=".csv,.json,text/csv,application/json" />
+        <span id="importFileName" class="import-file-name"></span>
       </div>
-
-      <div class="category">
-        <label for="maxValue">Max Value</label>
-        <input type="number" id="maxValue" value="100">
-      </div>
+      <textarea id="importInput" placeholder="…or paste your data here, or drop a file"></textarea>
+      <p id="importError" class="error-msg" hidden></p>
+      <button id="importApply" class="btn-primary" type="button">Apply</button>
     </div>
-  </section>
+  </div>
 
-  <!-- Data Input Section -->
-  <form id="dataForm">
-    <label class="section-title">Data Input</label>
-
-
-    <div class="field">
-      <div class="category">
-        <label for="dataName">Data Name</label>
-        <input type="text" value="Data 1" class="name">
-      </div>
-      <div class="category">
-        <label for="dataValue">Data Value</label>
-        <input type="number" value="34" class="value">
-      </div>
-    </div>
-
-
-    <div class="field">
-      <input type="text" value="Data 2" class="name">
-      <input type="number" value="65" class="value">
-    </div>
-    <div class="field">
-      <input type="text" value="Data 3" class="name">
-      <input type="number" value="92" class="value">
-    </div>
-
-    
-
-    <div class="field removable">
-      <input type="text" value="Data 4" class="name">
-      <input type="number" value="92" class="value">
-      <button class="remove-btn" onclick="removeField(this)">
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M8 23.75L6.25 22L13.25 15L6.25 8L8 6.25L15 13.25L22 6.25L23.75 8L16.75 15L23.75 22L22 23.75L15 16.75L8 23.75Z"
-            fill="#1C1B1F" />
-        </svg>
-      </button>
-    </div>
-    <div class="field removable">
-      <input type="text" value="Data 5" class="name">
-      <input type="number" value="85" class="value">
-      <button class="remove-btn" onclick="removeField(this)"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M8 23.75L6.25 22L13.25 15L6.25 8L8 6.25L15 13.25L22 6.25L23.75 8L16.75 15L23.75 22L22 23.75L15 16.75L8 23.75Z"
-            fill="#1C1B1F" />
-        </svg> </button>
-    </div>
-    <div class="field removable">
-      <input type="text" value="Data 6" class="name">
-      <input type="number" value="79" class="value">
-      <button class="remove-btn" onclick="removeField(this)"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M8 23.75L6.25 22L13.25 15L6.25 8L8 6.25L15 13.25L22 6.25L23.75 8L16.75 15L23.75 22L22 23.75L15 16.75L8 23.75Z"
-            fill="#1C1B1F" />
-        </svg> </button>
-    </div>
-  </form>
-
-  <section class="button-section">
-<div class="category">
-  <label>
-    <input type="checkbox" class="plugin-option" id="showDataValue" checked> Show Scale
-  </label>
-
-  <label>
-    <input type="checkbox" class="plugin-option" id="showDataPoints" checked> Show Data Points
-  </label>
-</div>
-    <button class="stroke-button" id="addMore">+ Add Data Rows</button>
-    <button class="cta" id="submit">Create Chart</button>
-  </section>
-
-  <script>
-    const form = document.getElementById('dataForm');
-    const addMoreBtn = document.getElementById('addMore');
-    const submitBtn = document.getElementById('submit');
-    const showDataValueCheckbox = document.getElementById('showDataValue');
-    const showDataPointsCheckbox = document.getElementById('showDataPoints');
-
-
-    addMoreBtn.addEventListener('click', () => {
-      const fieldDiv = document.createElement('div');
-      fieldDiv.classList.add('field', 'removable'); // Add the 'removable' class
-
-      const nameInput = document.createElement('input');
-      nameInput.setAttribute('type', 'text');
-      nameInput.setAttribute('placeholder', 'Name');
-      nameInput.classList.add('name');
-
-      const valueInput = document.createElement('input');
-      valueInput.setAttribute('type', 'number');
-      valueInput.setAttribute('placeholder', 'Value');
-      valueInput.classList.add('value');
-
-      // Create the remove button
-      const removeBtn = document.createElement('button');
-      removeBtn.classList.add('remove-btn');
-      removeBtn.onclick = function () {
-        fieldDiv.remove();
-      };
-
-      // Create the SVG element using your provided SVG content
-      const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svgElement.setAttribute('width', '30');
-      svgElement.setAttribute('height', '30');
-      svgElement.setAttribute('viewBox', '0 0 30 30');
-      svgElement.setAttribute('fill', 'none');
-      svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-
-      const svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      svgPath.setAttribute('d', 'M8 23.75L6.25 22L13.25 15L6.25 8L8 6.25L15 13.25L22 6.25L23.75 8L16.75 15L23.75 22L22 23.75L15 16.75L8 23.75Z');
-      svgPath.setAttribute('fill', '#1C1B1F');
-
-      svgElement.appendChild(svgPath);
-
-      // Append the SVG to the button
-      removeBtn.appendChild(svgElement);
-
-      fieldDiv.appendChild(nameInput);
-      fieldDiv.appendChild(valueInput);
-      fieldDiv.appendChild(removeBtn); // Append the remove button with SVG icon
-      form.appendChild(fieldDiv);
-    });
-
-
-
-    // Send data to Figma plugin when "Submit" is clicked
-    submitBtn.addEventListener('click', () => {
-      const minValue = document.getElementById('minValue').value;
-      const maxValue = document.getElementById('maxValue').value;
-      const color = document.getElementById('colorHex').value;
-      const rounding = document.getElementById('rounding').value;
-      const names = document.querySelectorAll('.name');
-      const values = document.querySelectorAll('.value');
-      const showDataValue = showDataValueCheckbox.checked;
-      const showDataPoints = showDataPointsCheckbox.checked;
-      const data = {
-        minValue: Number(minValue),
-        maxValue: Number(maxValue),
-        color: color,
-        rounding: Number(rounding),
-        dataSets: [],
-        showDataValue: showDataValue,
-        showDataPoints: showDataPoints
-      };
-
-      for (let i = 0; i < names.length; i++) {
-        data.dataSets.push({
-          name: names[i].value,
-          value: Number(values[i].value)
-        });
-      }
-
-      // Send data to Figma's code.ts
-      parent.postMessage({ pluginMessage: { type: 'submitData', data: data } }, '*');
-    });
-
-    function removeField(btn) {
-      const field = btn.closest('.field');
-      field.remove();
+  <script>"use strict";
+(() => {
+  // src/ui/preview.ts
+  function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return { r: 100, g: 100, b: 220 };
+    return {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    };
+  }
+  function renderPreview(canvas, data) {
+    const ctx = canvas.getContext("2d");
+    const size = parseFloat(canvas.style.width) || canvas.width / (window.devicePixelRatio || 1);
+    const cx = size / 2;
+    const cy = size / 2;
+    const maxR = size * 0.38;
+    const n = data.dataSets.length;
+    ctx.clearRect(0, 0, size, size);
+    if (n < 3) {
+      ctx.fillStyle = "#9ca3af";
+      ctx.font = "11px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Add at least 3 data points", cx, cy);
+      return;
     }
-
-    const minValueInput = document.getElementById('minValue');
-    const maxValueInput = document.getElementById('maxValue');
-
-    // Function to update the min and max attributes of all data input fields
-    function updateDataInputConstraints() {
-      const minValue = parseFloat(minValueInput.value);
-      const maxValue = parseFloat(maxValueInput.value);
-
-      document.querySelectorAll('.value').forEach(input => {
-        input.setAttribute('min', minValue);
-        input.setAttribute('max', maxValue);
+    const range = data.maxValue - data.minValue || 1;
+    const angleInc = 2 * Math.PI / n;
+    const startAngle = 3 * Math.PI / 2;
+    const gridStroke = data.gridColor || "#E5E7EB";
+    for (let ring = 0.2; ring <= 1.001; ring += 0.2) {
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const a = i * angleInc + startAngle;
+        const r2 = ring * maxR;
+        const x = cx + r2 * Math.cos(a);
+        const y = cy + r2 * Math.sin(a);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = gridStroke;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    if (!data.showDataValue) {
+      for (let i = 0; i < n; i++) {
+        const a = i * angleInc + startAngle;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + maxR * Math.cos(a), cy + maxR * Math.sin(a));
+        ctx.strokeStyle = gridStroke;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+    const pts = data.dataSets.map((d, i) => {
+      const r2 = (d.value - data.minValue) / range * maxR;
+      const a = i * angleInc + startAngle;
+      return { x: cx + r2 * Math.cos(a), y: cy + r2 * Math.sin(a) };
+    });
+    const { r, g, b } = hexToRgb(data.color);
+    ctx.beginPath();
+    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.closePath();
+    ctx.fillStyle = `rgba(${r},${g},${b},0.3)`;
+    ctx.fill();
+    ctx.beginPath();
+    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.closePath();
+    ctx.strokeStyle = `rgb(${r},${g},${b})`;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = "round";
+    ctx.stroke();
+    if (data.showDataPoints) {
+      pts.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fill();
       });
     }
-
-    // Add event listeners to the minValue and maxValue input fields
-    minValueInput.addEventListener('input', updateDataInputConstraints);
-    maxValueInput.addEventListener('input', updateDataInputConstraints);
-
-    // Function to correct data input values if they're outside the allowed range
-    function checkDataInputValue(input) {
-      const value = parseFloat(input.value);
-      const minValue = parseFloat(minValueInput.value);
-      const maxValue = parseFloat(maxValueInput.value);
-
-      if (value < minValue) {
-        input.value = minValue;
-      } else if (value > maxValue) {
-        input.value = maxValue;
-      }
+    ctx.fillStyle = "#374151";
+    ctx.font = "9px Inter, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    for (let i = 0; i < n; i++) {
+      const a = i * angleInc + startAngle;
+      const labelR = maxR + 14;
+      const lx = cx + labelR * Math.cos(a);
+      const ly = cy + labelR * Math.sin(a);
+      ctx.fillText(data.dataSets[i].name, lx, ly);
     }
+  }
 
-    // Add event listeners to all data input fields
-    document.querySelectorAll('.value').forEach(input => {
-      input.addEventListener('input', () => checkDataInputValue(input));
+  // src/ui/import.ts
+  function parseCSV(text) {
+    var _a;
+    const lines = text.trim().split("\n").filter((l) => l.trim());
+    if (lines.length === 0) throw new Error("Empty input");
+    const firstCols = lines[0].split(",");
+    const start = isNaN(Number((_a = firstCols[1]) == null ? void 0 : _a.trim())) ? 1 : 0;
+    const rows = lines.slice(start);
+    if (rows.length === 0) throw new Error("No data rows found (only a header?)");
+    return rows.map((line, i) => {
+      var _a2, _b;
+      const parts = line.split(",");
+      const name = (_a2 = parts[0]) == null ? void 0 : _a2.trim();
+      const valStr = (_b = parts[1]) == null ? void 0 : _b.trim();
+      if (!name || valStr === void 0) throw new Error(`Row ${i + 1 + start}: expected "Name,Value"`);
+      const value = Number(valStr);
+      if (isNaN(value)) throw new Error(`Row ${i + 1 + start}: "${valStr}" is not a number`);
+      return { name, value };
     });
-
-
-    const colorSquare = document.getElementById('colorSquare');
-    const colorInput = document.getElementById('color');
-    const colorHex = document.getElementById('colorHex');
-
-    colorHex.value = getRandomHexColor();
-
-    colorInput.value = colorHex.value;
-    colorSquare.style.backgroundColor = colorHex.value;
-
-    colorHex.addEventListener('input', () => {
-      if (isValidHex(colorHex.value)) {
-        colorSquare.style.backgroundColor = colorHex.value;
-        colorInput.value = colorHex.value;
+  }
+  function parseJSON(text) {
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      throw new Error("Invalid JSON");
+    }
+    if (!Array.isArray(parsed)) throw new Error("Expected a JSON array at the top level");
+    return parsed.map((item, i) => {
+      if (typeof item.name !== "string" || typeof item.value !== "number") {
+        throw new Error(`Item ${i}: must have { "name": string, "value": number }`);
       }
-
+      return { name: item.name, value: item.value };
     });
+  }
 
-    colorSquare.onclick = () => {
-      colorInput.click();
+  // src/ui/main.ts
+  var form = document.getElementById("dataForm");
+  var addMoreBtn = document.getElementById("addMore");
+  var submitBtn = document.getElementById("submit");
+  var showDataValueToggle = document.getElementById("showDataValue");
+  var showDataPointsToggle = document.getElementById("showDataPoints");
+  var previewCanvas = document.getElementById("previewCanvas");
+  function isToggleOn(btn) {
+    return btn.getAttribute("aria-checked") === "true";
+  }
+  function setToggle(btn, on) {
+    btn.setAttribute("aria-checked", String(on));
+  }
+  function wireToggle(btn) {
+    btn.addEventListener("click", () => {
+      setToggle(btn, !isToggleOn(btn));
+      savePrefs();
+      triggerPreview();
+    });
+  }
+  function savePrefs() {
+    parent.postMessage({ pluginMessage: {
+      type: "setPrefs",
+      prefs: {
+        showDataValue: isToggleOn(showDataValueToggle),
+        showDataPoints: isToggleOn(showDataPointsToggle),
+        gridColor: gridColorHex.value
+      }
+    } }, "*");
+  }
+  window.addEventListener("message", (event) => {
+    var _a;
+    const msg = (_a = event.data) == null ? void 0 : _a.pluginMessage;
+    if (!msg) return;
+    if (msg.type === "prefsLoaded") {
+      if (typeof msg.prefs.showDataValue === "boolean") setToggle(showDataValueToggle, msg.prefs.showDataValue);
+      if (typeof msg.prefs.showDataPoints === "boolean") setToggle(showDataPointsToggle, msg.prefs.showDataPoints);
+      if (typeof msg.prefs.gridColor === "string" && isValidHex(msg.prefs.gridColor)) {
+        applyGridColor(msg.prefs.gridColor);
+      }
+      triggerPreview();
+    }
+  });
+  wireToggle(showDataValueToggle);
+  wireToggle(showDataPointsToggle);
+  function setupCanvas() {
+    const wrap = previewCanvas.parentElement;
+    const dpr = window.devicePixelRatio || 1;
+    const cssSize = wrap.clientWidth - 24;
+    previewCanvas.style.width = cssSize + "px";
+    previewCanvas.style.height = cssSize + "px";
+    previewCanvas.width = Math.round(cssSize * dpr);
+    previewCanvas.height = Math.round(cssSize * dpr);
+    previewCanvas.getContext("2d").scale(dpr, dpr);
+  }
+  function getFormData() {
+    const minValue = parseFloat(document.getElementById("minValue").value) || 0;
+    const maxValue = parseFloat(document.getElementById("maxValue").value) || 100;
+    const color = document.getElementById("colorHex").value || "#6366f1";
+    const gridColor = gridColorHex.value || "#E5E7EB";
+    const dataSets = [];
+    const names = form.querySelectorAll(".name");
+    const values = form.querySelectorAll(".value");
+    for (let i = 0; i < names.length; i++) {
+      dataSets.push({ name: names[i].value, value: Number(values[i].value) });
+    }
+    return {
+      color,
+      gridColor,
+      minValue,
+      maxValue,
+      dataSets,
+      showDataValue: !isToggleOn(showDataValueToggle),
+      showDataPoints: isToggleOn(showDataPointsToggle)
     };
-
-    colorInput.addEventListener('change', () => {
-      colorSquare.style.backgroundColor = colorInput.value;
-      colorHex.value = colorInput.value;
+  }
+  function triggerPreview() {
+    renderPreview(previewCanvas, getFormData());
+  }
+  var colorSquare = document.getElementById("colorSquare");
+  var colorInput = document.getElementById("color");
+  var colorHex = document.getElementById("colorHex");
+  colorHex.value = getRandomHexColor();
+  colorInput.value = colorHex.value;
+  colorSquare.style.backgroundColor = colorHex.value;
+  colorHex.addEventListener("input", () => {
+    if (isValidHex(colorHex.value)) {
+      colorSquare.style.backgroundColor = colorHex.value;
+      colorInput.value = colorHex.value;
+      triggerPreview();
+    }
+  });
+  colorSquare.onclick = () => colorInput.click();
+  colorInput.addEventListener("change", () => {
+    colorSquare.style.backgroundColor = colorInput.value;
+    colorHex.value = colorInput.value;
+    triggerPreview();
+  });
+  var gridColorSquare = document.getElementById("gridColorSquare");
+  var gridColorInput = document.getElementById("gridColor");
+  var gridColorHex = document.getElementById("gridColorHex");
+  var resetGridColorBtn = document.getElementById("resetGridColor");
+  var DEFAULT_GRID_COLOR = "#E5E7EB";
+  function applyGridColor(hex) {
+    gridColorSquare.style.backgroundColor = hex;
+    gridColorInput.value = hex;
+    gridColorHex.value = hex;
+    resetGridColorBtn.style.visibility = hex.toUpperCase() === DEFAULT_GRID_COLOR.toUpperCase() ? "hidden" : "visible";
+  }
+  applyGridColor(DEFAULT_GRID_COLOR);
+  gridColorHex.addEventListener("input", () => {
+    if (isValidHex(gridColorHex.value)) {
+      applyGridColor(gridColorHex.value);
+      savePrefs();
+      triggerPreview();
+    }
+  });
+  gridColorSquare.onclick = () => gridColorInput.click();
+  resetGridColorBtn.addEventListener("click", () => {
+    applyGridColor(DEFAULT_GRID_COLOR);
+    savePrefs();
+    triggerPreview();
+  });
+  gridColorInput.addEventListener("change", () => {
+    applyGridColor(gridColorInput.value);
+    savePrefs();
+    triggerPreview();
+  });
+  setupCanvas();
+  triggerPreview();
+  form.addEventListener("input", triggerPreview);
+  function createRemoveIcon() {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 14 14");
+    svg.setAttribute("fill", "none");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M1 1l12 12M13 1L1 13");
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "1.75");
+    path.setAttribute("stroke-linecap", "round");
+    svg.appendChild(path);
+    return svg;
+  }
+  function randomRowDefaults() {
+    const n = form.querySelectorAll(".field").length + 1;
+    const min = parseFloat(minValueInput.value) || 0;
+    const max = parseFloat(maxValueInput.value) || 100;
+    return { name: `Data ${n}`, value: String(Math.round(min + Math.random() * (max - min))) };
+  }
+  function addRow(name, value) {
+    const defaults = randomRowDefaults();
+    const resolvedName = name !== void 0 && name !== "" ? name : defaults.name;
+    const resolvedValue = value !== void 0 && value !== "" ? value : defaults.value;
+    const fieldDiv = document.createElement("div");
+    fieldDiv.classList.add("field", "removable");
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.placeholder = "Name";
+    nameInput.classList.add("name");
+    nameInput.value = resolvedName;
+    const valueInput = document.createElement("input");
+    valueInput.type = "number";
+    valueInput.placeholder = "0";
+    valueInput.classList.add("value");
+    valueInput.value = resolvedValue;
+    valueInput.addEventListener("input", () => checkDataInputValue(valueInput));
+    const removeBtn = document.createElement("button");
+    removeBtn.classList.add("remove-btn");
+    removeBtn.type = "button";
+    removeBtn.appendChild(createRemoveIcon());
+    removeBtn.onclick = () => {
+      fieldDiv.remove();
+      triggerPreview();
+    };
+    fieldDiv.appendChild(nameInput);
+    fieldDiv.appendChild(valueInput);
+    fieldDiv.appendChild(removeBtn);
+    form.appendChild(fieldDiv);
+  }
+  addMoreBtn.addEventListener("click", () => {
+    addRow();
+    triggerPreview();
+  });
+  submitBtn.addEventListener("click", () => {
+    parent.postMessage({ pluginMessage: { type: "submitData", data: getFormData() } }, "*");
+  });
+  function removeField(btn) {
+    btn.closest(".field").remove();
+    triggerPreview();
+  }
+  window["removeField"] = removeField;
+  var minValueInput = document.getElementById("minValue");
+  var maxValueInput = document.getElementById("maxValue");
+  function updateDataInputConstraints() {
+    const min = parseFloat(minValueInput.value);
+    const max = parseFloat(maxValueInput.value);
+    form.querySelectorAll(".value").forEach((input) => {
+      input.setAttribute("min", String(min));
+      input.setAttribute("max", String(max));
     });
-
-    function isValidHex(hex) {
-      return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex);
+  }
+  minValueInput.addEventListener("input", () => {
+    const v = parseFloat(minValueInput.value);
+    if (!isNaN(v) && v < 0) minValueInput.value = "0";
+    updateDataInputConstraints();
+  });
+  maxValueInput.addEventListener("input", updateDataInputConstraints);
+  function checkDataInputValue(input) {
+    let value = parseFloat(input.value);
+    if (isNaN(value)) return;
+    if (value < 0) {
+      value = 0;
+      input.value = "0";
     }
-
-    function getRandomHexColor() {
-      const letters = '0123456789ABCDEF';
-      let color = '#';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
+    const max = parseFloat(maxValueInput.value);
+    if (value > max) {
+      maxValueInput.value = String(Math.ceil(value / 10) * 10);
+      updateDataInputConstraints();
     }
-  </script>
-
+  }
+  form.querySelectorAll(".value").forEach((input) => {
+    input.addEventListener("input", () => checkDataInputValue(input));
+  });
+  function isValidHex(hex) {
+    return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex);
+  }
+  function getRandomHexColor() {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) color += letters[Math.floor(Math.random() * 16)];
+    return color;
+  }
+  var importModal = document.getElementById("importModal");
+  var openImportBtn = document.getElementById("openImport");
+  var closeImportBtn = document.getElementById("closeImport");
+  var importInput = document.getElementById("importInput");
+  var importError = document.getElementById("importError");
+  var importApplyBtn = document.getElementById("importApply");
+  var csvHint = document.getElementById("csvHint");
+  var jsonHint = document.getElementById("jsonHint");
+  var tabs = document.querySelectorAll(".tab");
+  var activeTab = "csv";
+  function switchTab(target) {
+    activeTab = target;
+    tabs.forEach((t) => t.classList.toggle("active", t.dataset["tab"] === target));
+    csvHint.hidden = target !== "csv";
+    jsonHint.hidden = target !== "json";
+    importInput.placeholder = target === "csv" ? "Name,Value\nSpeed,80\nStrength,60" : '[{"name":"Speed","value":80}]';
+    importError.hidden = true;
+  }
+  openImportBtn.addEventListener("click", () => {
+    importModal.removeAttribute("hidden");
+    importInput.value = "";
+    importError.hidden = true;
+    importInput.focus();
+  });
+  closeImportBtn.addEventListener("click", () => importModal.setAttribute("hidden", ""));
+  importModal.addEventListener("click", (e) => {
+    if (e.target === importModal) importModal.setAttribute("hidden", "");
+  });
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => switchTab(tab.dataset["tab"]));
+  });
+  var importFileInput = document.getElementById("importFile");
+  var importFileName = document.getElementById("importFileName");
+  function loadFileText(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      var _a;
+      importInput.value = reader.result.trim();
+      importFileName.textContent = file.name;
+      importError.hidden = true;
+      const ext = (_a = file.name.split(".").pop()) == null ? void 0 : _a.toLowerCase();
+      if (ext === "csv" || ext === "json") switchTab(ext);
+    };
+    reader.readAsText(file);
+  }
+  importFileInput.addEventListener("change", () => {
+    var _a;
+    const file = (_a = importFileInput.files) == null ? void 0 : _a[0];
+    if (file) loadFileText(file);
+    importFileInput.value = "";
+  });
+  importInput.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    importInput.classList.add("drag-over");
+  });
+  importInput.addEventListener("dragleave", () => importInput.classList.remove("drag-over"));
+  importInput.addEventListener("drop", (e) => {
+    var _a;
+    e.preventDefault();
+    importInput.classList.remove("drag-over");
+    const file = (_a = e.dataTransfer) == null ? void 0 : _a.files[0];
+    if (file) loadFileText(file);
+  });
+  importApplyBtn.addEventListener("click", () => {
+    const text = importInput.value.trim();
+    if (!text) {
+      showImportError("Please paste some data first.");
+      return;
+    }
+    let rows;
+    try {
+      rows = activeTab === "csv" ? parseCSV(text) : parseJSON(text);
+    } catch (err) {
+      showImportError(err.message);
+      return;
+    }
+    if (rows.length < 3) {
+      showImportError("Need at least 3 data points for a radar chart.");
+      return;
+    }
+    form.innerHTML = "";
+    rows.forEach((row) => addRow(row.name, String(row.value)));
+    importModal.setAttribute("hidden", "");
+    triggerPreview();
+  });
+  function showImportError(msg) {
+    importError.textContent = msg;
+    importError.hidden = false;
+  }
+})();
+</script>
 </body>
-
 </html>

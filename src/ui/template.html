@@ -1,0 +1,187 @@
+<head>
+  <title>Radar Chart</title>
+  <style>/* __CSS_PLACEHOLDER__ */</style>
+</head>
+
+<body>
+
+  <!-- Left panel: form -->
+  <div class="left-panel">
+    <div class="scroll-area">
+
+      <!-- Styling -->
+      <section class="section">
+        <p class="section-title">Styling</p>
+        <div class="section-body grid-2">
+          <div>
+            <label class="field-label">Chart Color</label>
+            <div class="color-row">
+              <div class="color-swatch" id="colorSquare"></div>
+              <input type="color" id="color" style="display:none" />
+              <input type="text" id="colorHex" placeholder="#000000" />
+            </div>
+          </div>
+          <div>
+            <div class="field-label-row">
+              <label class="field-label" style="margin-bottom:0">Grid Color</label>
+              <button class="btn-reset" id="resetGridColor" type="button" title="Reset to default">
+                <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 7a5 5 0 1 0 1.5-3.5L2 2v3h3L3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="color-row">
+              <div class="color-swatch" id="gridColorSquare"></div>
+              <input type="color" id="gridColor" style="display:none" />
+              <input type="text" id="gridColorHex" placeholder="#E5E7EB" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Data Range -->
+      <section class="section">
+        <p class="section-title">Data Range</p>
+        <div class="section-body grid-2">
+          <div>
+            <label class="field-label">Min Value</label>
+            <input type="number" id="minValue" value="0" />
+          </div>
+          <div>
+            <label class="field-label">Max Value</label>
+            <input type="number" id="maxValue" value="100" />
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Data Points -->
+      <section class="section">
+        <div class="section-header">
+          <p class="section-title" style="margin-bottom:0">Data Points</p>
+          <button class="btn-import" id="openImport" type="button" title="Import data">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3 11v1.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Import
+          </button>
+        </div>
+
+        <div class="row-header">
+          <span>Name</span>
+          <span>Value</span>
+          <span></span>
+        </div>
+
+        <form id="dataForm">
+          <div class="field">
+            <input type="text" value="Data 1" class="name" placeholder="Name" />
+            <input type="number" value="34" class="value" placeholder="0" />
+          </div>
+          <div class="field">
+            <input type="text" value="Data 2" class="name" placeholder="Name" />
+            <input type="number" value="65" class="value" placeholder="0" />
+          </div>
+          <div class="field">
+            <input type="text" value="Data 3" class="name" placeholder="Name" />
+            <input type="number" value="92" class="value" placeholder="0" />
+          </div>
+          <div class="field removable">
+            <input type="text" value="Data 4" class="name" placeholder="Name" />
+            <input type="number" value="92" class="value" placeholder="0" />
+            <button class="remove-btn" onclick="removeField(this)" type="button">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="field removable">
+            <input type="text" value="Data 5" class="name" placeholder="Name" />
+            <input type="number" value="85" class="value" placeholder="0" />
+            <button class="remove-btn" onclick="removeField(this)" type="button">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="field removable">
+            <input type="text" value="Data 6" class="name" placeholder="Name" />
+            <input type="number" value="79" class="value" placeholder="0" />
+            <button class="remove-btn" onclick="removeField(this)" type="button">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Options -->
+      <section class="section">
+        <p class="section-title">Options</p>
+        <div class="section-body toggles">
+          <label class="toggle-row">
+            <span class="toggle-label-text">Gridlines</span>
+            <button class="toggle-pill" id="showDataValue" role="switch" aria-checked="true" type="button"></button>
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label-text">Show Data Points</span>
+            <button class="toggle-pill" id="showDataPoints" role="switch" aria-checked="true" type="button"></button>
+          </label>
+        </div>
+      </section>
+
+    </div><!-- end scroll-area -->
+
+    <!-- Sticky action bar -->
+    <div class="action-bar">
+      <button class="btn-ghost" id="addMore" type="button">+ Add Row</button>
+      <button class="btn-primary" id="submit" type="button">Create Chart</button>
+    </div>
+  </div><!-- end left-panel -->
+
+  <!-- Right panel: live preview -->
+  <div class="right-panel">
+    <p class="section-title preview-title">Preview</p>
+    <div class="preview-wrap">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div id="importModal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Import Data</span>
+        <button id="closeImport" class="remove-btn" type="button">
+          <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="tab-bar">
+        <button class="tab active" data-tab="csv" type="button">CSV</button>
+        <button class="tab" data-tab="json" type="button">JSON</button>
+      </div>
+      <div id="csvHint" class="import-hint">Name,Value<br>Speed,80<br>Strength,60</div>
+      <div id="jsonHint" class="import-hint" hidden>[{"name":"Speed","value":80},...]</div>
+      <div class="import-file-row">
+        <label class="btn-file" for="importFile">Upload file</label>
+        <input type="file" id="importFile" accept=".csv,.json,text/csv,application/json" />
+        <span id="importFileName" class="import-file-name"></span>
+      </div>
+      <textarea id="importInput" placeholder="…or paste your data here, or drop a file"></textarea>
+      <p id="importError" class="error-msg" hidden></p>
+      <button id="importApply" class="btn-primary" type="button">Apply</button>
+    </div>
+  </div>
+
+  <script>/* __JS_PLACEHOLDER__ */</script>
+</body>
+</html>
